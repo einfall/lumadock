@@ -17,7 +17,7 @@ import android.widget.TextView;
 /** A local sample preview. It never sends volume keys or queries the soundbar. */
 final class VolumeStylePicker {
     static void show(Activity activity,VolumeStyle[] selected,Runnable changed){
-        Dialog dialog=new Dialog(activity);dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Dialog dialog=new Dialog(activity);NavigationSounds.attach(activity,dialog.getWindow());dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Handler handler=new Handler(Looper.getMainLooper());
         VolumeOsdView[] sample={null};
         LinearLayout panel=new LinearLayout(activity);panel.setOrientation(LinearLayout.VERTICAL);

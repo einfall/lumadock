@@ -3494,7 +3494,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     private PopupWindow glassPopup(View panel, int width) {
-        final PopupWindow popup = new PopupWindow(panel, width, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        final PopupWindow popup = new PopupWindow(NavigationSounds.wrap(this,panel), width, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));   // needed for Back to dismiss
         popup.setOutsideTouchable(true);
         popup.setAnimationStyle(0);
@@ -3737,6 +3737,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
 
         final Dialog dialog = new Dialog(this);
+        NavigationSounds.attach(this,dialog.getWindow());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(panel);
         dialog.setCanceledOnTouchOutside(false);

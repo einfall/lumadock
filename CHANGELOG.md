@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 — 2026-11-04
+
+Optional navigation sounds under Design & Apps → Ton & HDMI-CEC: keep the existing system sounds (default), use an original soft Luma click, or mute normal click feedback within Luma Dock. The Luma click has its own 0–100% level, a preview button and selectable Media (HDMI/ARC, default) or System audio routing. Media routing supports devices that silence their system-audio path. D-pad, OK and Back feedback works on Home, in settings and in launcher popups. Normal view sounds are suppressed in the custom mode to avoid duplicate clicks, and their original flags are restored when switching back to System. Volume, Home, power and text keys do not trigger the custom click. Held arrows are rate-limited; holding OK does not keep playing clicks.
+
+The short sample is synthesized from source by scripts/generate-navigation-click.py, preloaded with SoundPool, and needs no network, permission or audio focus change. No global TV audio setting or other app is changed. 467 JVM tests pass; Android lint has zero errors. The on-device listening test passed using the media audio path with global system clicks disabled.
+
 ## 1.0.2 — 2026-11-04
 
 Optional dock placement in the Dock Only view: width 60–100%, horizontal alignment and vertical placement within the area below the header. Controls apply live and keep the settings panel open. Existing placement remains the default. Optional iOS-style page dots stay centered at the bottom inside the dock; the active dot follows the app page, including partial final pages. The numeric position pill follows dock placement too.

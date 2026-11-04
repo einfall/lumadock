@@ -88,6 +88,7 @@
     </queries>
 
     <application
+        android:name=".LumaApplication"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/live_wallpaper_network"
         android:label="@string/app_name"

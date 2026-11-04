@@ -10,7 +10,7 @@ final class SettingsSheet {
     private static final java.util.Map<Activity,java.util.List<java.lang.ref.WeakReference<Dialog>>> WINDOWS=new java.util.WeakHashMap<>();
     private static final java.util.Map<Dialog,Boolean> SHEETS=new java.util.WeakHashMap<>();
     private static final java.util.Map<Dialog,java.lang.ref.WeakReference<View>> SAVED_FOCUS=new java.util.WeakHashMap<>();
-    static void track(Activity a,Dialog dialog){WINDOWS.computeIfAbsent(a,k->new java.util.ArrayList<>()).add(new java.lang.ref.WeakReference<>(dialog));}
+    static void track(Activity a,Dialog dialog){NavigationSounds.attach(a,dialog.getWindow());WINDOWS.computeIfAbsent(a,k->new java.util.ArrayList<>()).add(new java.lang.ref.WeakReference<>(dialog));}
     private static final java.util.Set<Activity> CLOSING=java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
     static void dismissAll(Activity a){CLOSING.add(a);try{java.util.List<java.lang.ref.WeakReference<Dialog>> list=WINDOWS.remove(a);if(list!=null)for(int i=list.size()-1;i>=0;i--){Dialog d=list.get(i).get();if(d!=null&&d.getWindow()!=null&&d.getWindow().getDecorView().isAttachedToWindow())d.dismiss();}}finally{CLOSING.remove(a);}}
     static java.util.List<Dialog> hideForPlacement(Activity a){java.util.List<Dialog> hidden=new java.util.ArrayList<>();java.util.List<java.lang.ref.WeakReference<Dialog>> list=WINDOWS.get(a);if(list!=null)for(java.lang.ref.WeakReference<Dialog> ref:list){Dialog d=ref.get();if(d!=null&&d.isShowing()&&d.getWindow()!=null&&d.getWindow().getDecorView().getVisibility()==View.VISIBLE){View focus=d.getCurrentFocus();if(focus!=null)SAVED_FOCUS.put(d,new java.lang.ref.WeakReference<>(focus));d.hide();hidden.add(d);}}return hidden;}
