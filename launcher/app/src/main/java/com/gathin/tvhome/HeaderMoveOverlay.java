@@ -18,9 +18,11 @@ final class HeaderMoveOverlay extends View {
             if(code==KeyEvent.KEYCODE_DPAD_CENTER||code==KeyEvent.KEYCODE_ENTER){if(event.getAction()==KeyEvent.ACTION_UP){accepted=true;layout.set(key,x,y);dialog.dismiss();}return true;}
             if(code==KeyEvent.KEYCODE_BACK||code==KeyEvent.KEYCODE_ESCAPE){if(event.getAction()==KeyEvent.ACTION_UP)dialog.dismiss();return true;}return false;
         });
+        NavigationSounds.attach(a,dialog.getWindow());
         dialog.setOnDismissListener(d->{layout.endPreview();SettingsSheet.restoreAfterPlacement(hidden);if(accepted)changed.run();});dialog.show();if(w!=null)w.setLayout(-1,-1);requestFocus();
     }
     @Override protected void onDraw(Canvas c){
+        setContentDescription(title+" · X "+x+" · Y "+y);
         Rect actual=layout.bounds(key);RectF box=new RectF(actual);box.inset(-5*density,-5*density);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(2*density);paint.setColor(0xFF98CCFF);c.drawRoundRect(box,10*density,10*density,paint);
         float pad=18*density,barH=66*density;float top=box.centerY()>getHeight()/2?pad:getHeight()-barH-pad;RectF bar=new RectF(pad,top,getWidth()-pad,top+barH);paint.setStyle(Paint.Style.FILL);paint.setColor(0xF0101824);c.drawRoundRect(bar,14*density,14*density,paint);paint.setColor(Color.WHITE);paint.setTextSize(16*density);c.drawText(title+" · X "+x+" · Y "+y,bar.left+16*density,bar.top+25*density,paint);paint.setColor(0xFFB8C8DD);paint.setTextSize(11*density);c.drawText(a.getString(R.string.header_move_keys,step),bar.left+16*density,bar.top+47*density,paint);
     }

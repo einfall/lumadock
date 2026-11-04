@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 — 2026-11-04
+
+Move the dock with the D-pad using the same fullscreen placement control as widgets. Open Design & Apps → Layout & Dock → Dock verschieben in Dock Only view. Arrows preview the new screen position, OK saves and enables the custom position, and Back cancels without storing coordinates. The shared movement step is adjustable from 1–20 dp. The dock can move horizontally even at full width, within the available screen edges. Its focus frame, selected-app caption and page dots follow the move. Existing positions remain unchanged until a move is confirmed; the custom-position switch returns to the previous layout when disabled. Dock width remains adjustable; legacy percentage positions remain compatible.
+
+Live device checks cover both axes, cancellation, saving and reopening, the top-left screen boundary, page dots, and restoring the previous layout. 467 JVM tests pass; Android lint has zero errors. No new permission or dependency.
+
 ## 1.0.3 — 2026-11-04
 
 Optional navigation sounds under Design & Apps → Ton & HDMI-CEC: keep the existing system sounds (default), use an original soft Luma click, or mute normal click feedback within Luma Dock. The Luma click has its own 0–100% level, a preview button and selectable Media (HDMI/ARC, default) or System audio routing. Media routing supports devices that silence their system-audio path. D-pad, OK and Back feedback works on Home, in settings and in launcher popups. Normal view sounds are suppressed in the custom mode to avoid duplicate clicks, and their original flags are restored when switching back to System. Volume, Home, power and text keys do not trigger the custom click. Held arrows are rate-limited; holding OK does not keep playing clicks.

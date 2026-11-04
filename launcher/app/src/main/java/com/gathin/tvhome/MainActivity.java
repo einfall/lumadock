@@ -111,6 +111,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean dockBackHeld;
     private TextView dockCounter;
     private DockPageDots dockPageDots;
+    private DockMoveController dockMove;
     private ViewTreeObserver.OnPreDrawListener dockFocusLayout;
     private int dockFocusDescendants;
     private long dockUsageRevision;
@@ -739,6 +740,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
         // rows_below_dock grid rows under it; the rest of the grid stays below until you press Down.
         grid.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->layoutDesignGrid());
+        dockMove=new DockMoveController(this,root,grid,()->singleRow,this::shiftDockDecorations);
         dockPageDots=new DockPageDots(this,root,grid,()->new int[]{
                 singleRow&&getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean(DockPlacementPopup.DOTS,false)?1:0,
                 adapter.appCount(),dockColumns,lastFocused});
@@ -1200,6 +1202,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     }
 
+    void moveDock(Runnable changed){
+        if(!singleRow||!dockRow){Toast.makeText(this,"Bitte zuerst Nur Dock aktivieren",Toast.LENGTH_LONG).show();return;}
+        HeaderMoveOverlay.show(this,dockMove,"dock","Dock verschieben",changed);
+    }
+    private void shiftDockDecorations(int dx,int dy){
+        if(grid.hasFocus()&&glassShown){springX.cancel();springY.cancel();glassTargetX+=dx;glassTargetY+=dy;
+            glass.setTranslationX(glass.getTranslationX()+dx);glass.setTranslationY(glass.getTranslationY()+dy);}
+        if(dockCounter.getVisibility()==View.VISIBLE){dockCounter.setTranslationX(dockCounter.getTranslationX()+dx);dockCounter.setTranslationY(dockCounter.getTranslationY()+dy);}
+        if(heroShown){hero.setY(hero.getY()+dy);if(appTitleStyle!=null)appTitleStyle.schedule();}
+    }
+
     /** Refresh the visible Home while the settings dialog retains its own window and focus. */
     private void refreshDesignPreview(){
         applyTypography();
@@ -1483,6 +1496,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onDestroy() {
+        if(dockMove!=null)dockMove.close();
         if(dockPageDots!=null)dockPageDots.close();
         if(tileEffects!=null)tileEffects.dispose();
         super.onDestroy();

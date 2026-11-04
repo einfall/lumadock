@@ -26,8 +26,10 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private boolean paintValid;
     private float pageRoom;
     private boolean boundsValid;
+    private float radius;
     DockDecoration withPageRoom(float room){pageRoom=Math.max(0,room);return this;}
     boolean bounds(RectF out){out.set(rect);return boundsValid;}
+    boolean bounds(RecyclerView parent,RectF out){boolean valid=measureBounds(parent);out.set(rect);return valid;}
     private final QuickAccessDock quickAccess=new QuickAccessDock();
     DockDecoration(int size,float density,boolean translucent,boolean names,int opacity,boolean lightGlass,boolean evenPadding,boolean visible,boolean singleRow,boolean bandAll,DockStyle style){this(size,density,translucent,names,opacity,lightGlass,evenPadding,visible,singleRow,bandAll);setStyle(style);}
     void setStyle(DockStyle style){custom=style;paintValid=false;if(style==null||!"quickaccess".equals(style.mode))quickAccess.clear();}
@@ -98,8 +100,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         }
     }
 
-    @Override
-    public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+    private boolean measureBounds(RecyclerView parent) {
         boundsValid=false;
         boolean any = false;
         int cardWidth = 0;
@@ -122,7 +123,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
                 rect.union(l, t, r, b);
             }
         }
-        if (!any) return;
+        if (!any) return false;
         float pad = 14 * density;
         // The band can only draw inside the grid, and the first and last dock tiles sit 12dp in from its
         // edges: a full 14dp at the sides sliced the rounded ends flat (#454). Keep the sides, with the
@@ -131,7 +132,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         // outwards and still keeps about the band's top margin from its rounded end.
         float sidePad = 22 * density;
         float side = Math.max(0f, Math.min(sidePad, Math.min(rect.left, parent.getWidth() - rect.right) - density));
-        float radius = AppAdapter.cornerRadius(cardWidth, density);
+        radius = AppAdapter.cornerRadius(cardWidth, density);
         if (evenPadding) {
             // The same padding on all four sides, so the band's corners are concentric with the tiles' everywhere.
             int inner = parent.getWidth() - parent.getPaddingLeft() - parent.getPaddingRight();
@@ -153,6 +154,11 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         }
         rect.bottom += namesRoom+pageRoom;
         boundsValid=true;
+        return true;
+    }
+    @Override
+    public void onDraw(@NonNull Canvas c,@NonNull RecyclerView parent,@NonNull RecyclerView.State state){
+        if(!measureBounds(parent))return;
         if (!(custom==null?bandVisible:custom.visible)) return;
         if(custom!=null&&!"legacy".equals(custom.mode)){drawCustom(c);return;}
         if (lightGlass && (rect.top != shaderTop || rect.bottom != shaderBottom)) {
