@@ -42,7 +42,7 @@ assert len(data) == meta['size_bytes']
 assert hashlib.sha256(data).hexdigest() == meta['sha256']
 head = api('GET', '/git/ref/heads/main')['object']['sha']
 assert head == meta['source_sha'], 'Main changed after this release was prepared'
-tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/34.0.0'
+tools = Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT']) / 'build-tools/34.0.0'
 verify = subprocess.check_output([str(tools / 'apksigner'), 'verify', '--print-certs', str(apk)], text=True)
 cert = re.search(r'certificate SHA-256 digest:\s*([a-fA-F0-9:]+)', verify)
 assert cert and cert.group(1).replace(':', '').lower() == meta['certificate_sha256']
