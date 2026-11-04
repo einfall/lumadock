@@ -19,6 +19,7 @@ final class AppGlyph extends Drawable {
         p.setColor(tint==null?0xFFFFFFFF:tint.getColorForState(getState(),tint.getDefaultColor()));p.setStrokeWidth(1.7f);p.setStyle(Paint.Style.STROKE);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);path.reset();
         if(MenuGlyphs.draw(c,p,kind)){c.restoreToCount(save);return;}
         switch(kind){
+            case "network":c.drawLine(7,3,7,21,p);c.drawLine(3,7,7,3,p);c.drawLine(11,7,7,3,p);c.drawLine(17,3,17,21,p);c.drawLine(13,17,17,21,p);c.drawLine(21,17,17,21,p);break;
             case "text":c.drawLine(3,4,21,4,p);c.drawLine(12,4,12,21,p);c.drawLine(8,21,16,21,p);break;
             case "sparkle":path.moveTo(12,2);path.lineTo(15,9);path.lineTo(22,12);path.lineTo(15,15);path.lineTo(12,22);path.lineTo(9,15);path.lineTo(2,12);path.lineTo(9,9);path.close();c.drawPath(path,p);break;
             case "refresh":c.drawArc(new RectF(3,3,21,21),35,290,false,p);c.drawLine(21,3,21,9,p);c.drawLine(15,9,21,9,p);break;

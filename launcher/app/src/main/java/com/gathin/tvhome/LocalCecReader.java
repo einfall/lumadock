@@ -16,10 +16,11 @@ final class LocalCecReader {
     private static final byte[] DIGEST_INFO={0x30,0x21,0x30,0x09,0x06,0x05,0x2b,0x0e,0x03,0x02,0x1a,0x05,0x00,0x04,0x14};
     static final class AuthorizationNeeded extends IOException { }
 
-    static String read(Runnable awaitingAuthorization) throws Exception {return readFixed(awaitingAuthorization,false);}
+    static String read(Runnable awaitingAuthorization) throws Exception {return readFixed(awaitingAuthorization,0);}
     /** Only the aggregate CPU counter line; same already authorized, device-local ADB identity. */
-    static String readCpu() throws Exception {return readFixed(()->{},true);}
-    private static String readFixed(Runnable awaitingAuthorization,boolean cpu) throws Exception {
+    static String readCpu() throws Exception {return readFixed(()->{},1);}
+    static String readNetwork() throws Exception {return readFixed(()->{},2);}
+    private static String readFixed(Runnable awaitingAuthorization,int kind) throws Exception {
         try (Socket socket=new Socket()) {
             socket.connect(new InetSocketAddress(InetAddress.getByName("127.0.0.1"),5555),800);
             socket.setSoTimeout(2500);
@@ -33,7 +34,7 @@ final class LocalCecReader {
                 catch (SocketTimeoutException e) { if(offered) throw new AuthorizationNeeded(); throw e; }
                 if(packet.command==LocalAdbWire.command("CNXN")) {
                     socket.setSoTimeout(1800);
-                    return dump(in,out,cpu);
+                    return dump(in,out,kind);
                 }
                 if(packet.command!=LocalAdbWire.command("AUTH") || packet.arg0!=1 || packet.body.length!=20)
                     throw new IOException("Unexpected ADB handshake");
@@ -54,9 +55,9 @@ final class LocalCecReader {
         }
     }
 
-    private static String dump(InputStream in, OutputStream out,boolean cpu) throws IOException {
-        // Two fixed read-only services. No caller-controlled shell command or path.
-        LocalAdbWire.write(out,"OPEN",1,0,bytes(cpu?"shell:head -n 1 /proc/stat\0":"shell:dumpsys hdmi_control\0"));
+    private static String dump(InputStream in, OutputStream out,int kind) throws IOException {
+        // Fixed read-only services. No caller-controlled shell command or path.
+        LocalAdbWire.write(out,"OPEN",1,0,bytes(kind==1?"shell:head -n 1 /proc/stat\0":kind==2?"shell:cat /proc/net/dev\0":"shell:dumpsys hdmi_control\0"));
         ByteArrayOutputStream output=new ByteArrayOutputStream();
         long deadline=System.nanoTime()+5_000_000_000L;
         while(System.nanoTime()<deadline) {

@@ -25,6 +25,11 @@ final class HomeWidgetsPopup {
     private void sources(){SettingsSheet p=new SettingsSheet(a,s(R.string.widgets_sources));for(WidgetSource source:WidgetSource.values())p.row(source.glyph,HomeWidgets.sourceName(a,source.id),null,()->{HomeWidgetStore.Spec added=widgets.store.add(source.id);if(added==null){Toast.makeText(a,R.string.widgets_limit,Toast.LENGTH_LONG).show();return;}p.dialog.dismiss();item(added.id);});p.info(s(R.string.widgets_source_note));p.show();}
     private void item(String id){HomeWidgetStore.Spec spec=widgets.spec(id);if(spec==null||widgets.view(id)==null)return;SettingsSheet p=new SettingsSheet(a,title(spec));
         if(spec.quote())quoteOptions(p,id);
+        if("system".equals(spec.source)){
+            p.options("cpu","Systeminformationen · Layout",SystemInfoStyle.NAMES,i->SystemInfoStyle.IDS[i].equals(widgets.spec(id).metricsStyle),i->widgets.metricsStyle(id,SystemInfoStyle.IDS[i]));
+            p.toggle("Netzwerk · Download und Upload","LAN + WLAN zusammen · MB/s (Megabyte pro Sekunde)",spec.network,on->widgets.network(id,on));
+            p.info("Netzwerkraten sind Mittelwerte über das Aktualisierungsintervall. Tunnel und Loopback werden nicht doppelt gezählt.");
+        }
         LinearLayout shown=p.toggle(s(R.string.header_show),null,spec.enabled,on->widgets.show(id,on));
         p.row("move",s(R.string.header_move),s(R.string.header_move_hint),()->HeaderMoveOverlay.show(a,widgets,id,title(spec),()->{}));
         LinearLayout theme=spec.quote()?null:p.row("photo",s(R.string.widgets_theme),SurfaceThemePopup.name(a,spec.theme),()->SurfaceThemePopup.choose(a,s(R.string.widgets_theme),widgets.spec(id).theme,true,choice->widgets.theme(id,choice)));

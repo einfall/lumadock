@@ -7,11 +7,13 @@ final class AppTitlePopup {
         s.info(a.getString(R.string.title_position_hint));
         GridSlider size=new GridSlider(a,a.getString(R.string.title_size),18,120,AppTitlePolicy.size(p.getInt(AppTitleStyle.SIZE,style.originalSize)),n->p.edit().putInt(AppTitleStyle.SIZE,n).apply());s.add(size);
         GridSlider labels=new GridSlider(a,a.getString(R.string.title_labels),60,160,AppTitlePolicy.labels(p.getInt(AppTitleStyle.LABELS,100)),n->{p.edit().putInt(AppTitleStyle.LABELS,n).apply();changed.run();});s.add(labels);
-        final GridSlider[] coords=new GridSlider[2];Runnable sync=()->{int[] now=style.position("title");if(coords[0]!=null)coords[0].syncValue(now[0]);if(coords[1]!=null)coords[1].syncValue(now[1]);};
-        s.row("move",a.getString(R.string.title_move),a.getString(R.string.title_move_hint),()->HeaderMoveOverlay.show(a,style,"title",a.getString(R.string.typography_apps),sync));
-        int[] dimensions=style.size("title"),pos=style.position("title");
-        coords[0]=new GridSlider(a,a.getString(R.string.header_x),0,Math.max(0,style.width()-dimensions[0]),p.getInt(AppTitleStyle.X,pos[0]),n->{int[] now=style.position("title");style.set("title",n,now[1]);});s.add(coords[0]);
-        coords[1]=new GridSlider(a,a.getString(R.string.header_y),0,Math.max(0,style.height()-dimensions[1]),p.getInt(AppTitleStyle.Y,pos[1]),n->{int[] now=style.position("title");style.set("title",now[0],n);});s.add(coords[1]);
-        s.row("settings",a.getString(R.string.title_reset),null,()->{style.reset();size.syncValue(style.originalSize);labels.syncValue(100);changed.run();a.getWindow().getDecorView().postDelayed(sync,150);});s.show();
+        java.util.function.Supplier<PlacementTarget> target=()->AppTitleStyle.below(a)?style.focused():style;
+        final GridSlider[] coords=new GridSlider[2];Runnable sync=()->{int[] now=target.get().position("title");if(coords[0]!=null)coords[0].syncValue(now[0]);if(coords[1]!=null)coords[1].syncValue(now[1]);};
+        s.row("move",a.getString(R.string.title_move),a.getString(R.string.title_move_hint),()->HeaderMoveOverlay.show(a,target.get(),"title","App-Name verschieben",()->{sync.run();changed.run();}));
+        int[] dimensions=target.get().size("title"),pos=target.get().position("title");
+        coords[0]=new GridSlider(a,a.getString(R.string.header_x),0,Math.max(0,target.get().width()-dimensions[0]),pos[0],n->{int[] now=target.get().position("title");target.get().set("title",n,now[1]);});s.add(coords[0]);
+        coords[1]=new GridSlider(a,a.getString(R.string.header_y),0,Math.max(0,target.get().height()-dimensions[1]),pos[1],n->{int[] now=target.get().position("title");target.get().set("title",now[0],n);});s.add(coords[1]);
+        s.row("settings","Fokus-Beschriftung · Position zurücksetzen",null,()->{style.focused().reset();changed.run();});
+        s.row("settings",a.getString(R.string.title_reset),null,()->{style.reset();style.focused().reset();size.syncValue(style.originalSize);labels.syncValue(100);changed.run();a.getWindow().getDecorView().postDelayed(sync,150);});s.show();
     }
 }

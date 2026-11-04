@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.5 — 2026-11-04
+
+Move the caption beneath the focused app with the same fullscreen D-pad placement control as widgets: Design & Apps → Schriften & Icons → App-Name · Größe & Position → App-Name frei verschieben. Arrows preview the position, OK saves a relative offset that follows the focused tile, and Back cancels. A separate reset restores the default caption position without changing the large app-name layout.
+
+Four optional system-information layouts complement the existing appearance: Gefüllte Zeilen, Systemressourcen, Kompakte Liste and Pastellkarten. Enable them on the combined Systemübersicht or independently created system widgets. Optional network statistics display combined physical LAN and WLAN download/upload in decimal MB/s, averaged over the existing configurable sampling interval. VPN, loopback and bridge counters are excluded. A separate network widget source is also available. Sampling runs only for visible Home widgets; unavailable counters display a dash. Restricted devices use the existing authenticated local ADB connection for this fixed read-only counter query, without arbitrary shell commands or additional permissions.
+
+472 JVM tests pass; Android lint reports zero errors. Live TV checks cover caption preview/cancel/save/focus-following, all four widget styles, and real numeric network rates. Existing settings and the original widget appearance remain the defaults.
+
 ## 1.0.4 — 2026-11-04
 
 Move the dock with the D-pad using the same fullscreen placement control as widgets. Open Design & Apps → Layout & Dock → Dock verschieben in Dock Only view. Arrows preview the new screen position, OK saves and enables the custom position, and Back cancels without storing coordinates. The shared movement step is adjustable from 1–20 dp. The dock can move horizontally even at full width, within the available screen edges. Its focus frame, selected-app caption and page dots follow the move. Existing positions remain unchanged until a move is confirmed; the custom-position switch returns to the previous layout when disabled. Dock width remains adjustable; legacy percentage positions remain compatible.

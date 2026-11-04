@@ -13,7 +13,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 /** One caption follows the actual focused card through zoom, pivot and scrolling. No timer or focusable overlay. */
-final class FocusedAppName {
+final class FocusedAppName implements PlacementTarget {
+    static final String DX=AppTitleStyle.P+"focus_dx",DY=AppTitleStyle.P+"focus_dy";
     private final Activity activity;
     private final ViewGroup root;
     private final RecyclerView grid;
@@ -23,6 +24,7 @@ final class FocusedAppName {
     private final Rect cardBounds=new Rect();
     private boolean enabled,closed;
     private float edge,targetScale,textHeight;
+    private float baseX,baseY;private boolean preview;private int previewX,previewY;
     private final ViewTreeObserver.OnPreDrawListener draw=()->{place();return true;};
     private final SharedPreferences.OnSharedPreferenceChangeListener change=(p,key)->{
         if(key!=null&&(key.startsWith(AppTitleStyle.P)||key.startsWith("effects_focus_")||key.startsWith("motion_")||Typography.APPS.equals(key)))refresh();
@@ -78,8 +80,19 @@ final class FocusedAppName {
         float y=AppTitlePolicy.captionTop(top,card.getHeight(),card.getScaleY(),targetScale,edge,6*density);
         // A partially clipped row must not leave a detached caption over the header or another row.
         if(y<0||y+height>root.getHeight()||!item.isShown()){caption.setVisibility(View.INVISIBLE);return;}
-        caption.setX(AppTitlePolicy.captionLeft(left+card.getWidth()/2f,width,root.getWidth(),8*density));caption.setY(y);
+        baseX=AppTitlePolicy.captionLeft(left+card.getWidth()/2f,width,root.getWidth(),8*density);baseY=y;
+        caption.setX(HeaderLayoutPolicy.clamp(preview?Math.round(previewX*density):Math.round(baseX+prefs.getInt(DX,0)*density),root.getWidth(),width));
+        caption.setY(HeaderLayoutPolicy.clamp(preview?Math.round(previewY*density):Math.round(baseY+prefs.getInt(DY,0)*density),root.getHeight(),height));
         caption.setVisibility(View.VISIBLE);
     }
+    public View view(String key){return caption;}
+    public int[] size(String key){return new int[]{Math.round(caption.getWidth()/density),Math.round(caption.getHeight()/density)};}
+    public int[] position(String key){place();return new int[]{Math.round(caption.getX()/density),Math.round(caption.getY()/density)};}
+    public Rect bounds(String key){return new Rect(Math.round(caption.getX()),Math.round(caption.getY()),Math.round(caption.getX()+caption.getWidth()),Math.round(caption.getY()+caption.getHeight()));}
+    public int width(){return Math.round(root.getWidth()/density);}public int height(){return Math.round(root.getHeight()/density);}
+    public void preview(String key,int x,int y){preview=true;previewX=x;previewY=y;place();root.invalidate();}
+    public void endPreview(){preview=false;place();root.invalidate();}
+    public void set(String key,int x,int y){prefs.edit().putInt(DX,Math.round(x-baseX/density)).putInt(DY,Math.round(y-baseY/density)).apply();preview=false;place();}
+    void reset(){prefs.edit().remove(DX).remove(DY).apply();preview=false;place();}
     void close(){closed=true;prefs.unregisterOnSharedPreferenceChangeListener(change);if(root.getViewTreeObserver().isAlive())root.getViewTreeObserver().removeOnPreDrawListener(draw);root.removeView(caption);}
 }

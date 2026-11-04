@@ -10,6 +10,7 @@ final class AppTitleStyle implements PlacementTarget {
     static boolean below(Context c){return "focused".equals(AppTitlePolicy.mode(c.getSharedPreferences(Config.SETTINGS_NAME,0).getString(MODE,"hero")));}
     private final FocusedAppName focusedName;
     private final Activity a;private final TextView name;private final ViewGroup root;private final SharedPreferences prefs;
+    FocusedAppName focused(){return focusedName;}
     final int originalSize;private final float density;private boolean pending,closed,preview;private int px,py;
     private final ViewTreeObserver.OnGlobalLayoutListener layout=this::schedule;
     private final SharedPreferences.OnSharedPreferenceChangeListener listener=(p,k)->{if(k!=null&&k.startsWith(P))schedule();};
