@@ -1,0 +1,13 @@
+package com.gathin.tvhome;
+import org.junit.Test;
+import static org.junit.Assert.*;
+public class DockBrowsePolicyTest {
+ @Test public void pivotWalksToAnchorThenKeepsItThroughLastApp(){for(int pos=0;pos<13;pos++){int first=DockBrowsePolicy.first("pivot",pos,13,5,3);assertEquals(Math.min(2,pos),pos-first);}assertEquals(2,DockBrowsePolicy.trailing("pivot",13,5,3));}
+ @Test public void eachPossiblePivotIsStableForEveryDockSize(){for(int cols=4;cols<=7;cols++)for(int slot=1;slot<=cols;slot++)for(int pos=0;pos<20;pos++){int first=DockBrowsePolicy.first("pivot",pos,20,cols,slot);assertEquals(Math.min(slot-1,pos),pos-first);assertTrue(first+cols<=20+DockBrowsePolicy.trailing("pivot",20,cols,slot)||first==0);}}
+ @Test public void pagingMovesOnlyAtPageBoundaryAndPadsFinalPage(){assertEquals(0,DockBrowsePolicy.first("paging",4,13,5,3));assertEquals(5,DockBrowsePolicy.first("paging",5,13,5,3));assertEquals(10,DockBrowsePolicy.first("paging",12,13,5,3));assertEquals(2,DockBrowsePolicy.trailing("paging",13,5,3));assertEquals(0,DockBrowsePolicy.trailing("paging",15,5,3));}
+ @Test public void fewOrNoAppsNeverRequireNegativeOffsets(){assertEquals(0,DockBrowsePolicy.first("pivot",1,2,5,3));assertEquals(0,DockBrowsePolicy.first("paging",0,0,5,3));assertEquals(0,DockBrowsePolicy.trailing("pivot",0,5,3));}
+ @Test public void wrapCanJumpBetweenEndsWithoutLosingDesiredSlot(){int end=DockPolicy.horizontal(0,13,false,true);assertEquals(12,end);assertEquals(10,DockBrowsePolicy.first("pivot",end,13,5,3));assertEquals(0,DockBrowsePolicy.first("pivot",DockPolicy.horizontal(end,13,true,true),13,5,3));}
+ @Test public void invalidOptionsFallBackAndSlotTracksDockSize(){assertEquals("edge",DockBrowsePolicy.mode(null));assertEquals(1,DockBrowsePolicy.pivot(-5,5));assertEquals(4,DockBrowsePolicy.pivot(7,4));assertEquals(0,DockBrowsePolicy.first("paging",-10,13,5,3));assertEquals(10,DockBrowsePolicy.first("pivot",100,13,5,3));}
+ @Test public void oldFrameToggleMigratesWithoutChangingZoom(){assertEquals("none",FocusFrameMode.parse(null,false));assertEquals("moving",FocusFrameMode.parse(null,true));assertEquals("fade",FocusFrameMode.parse("fade",false));assertEquals("instant",FocusFrameMode.parse("instant",false));assertEquals("instant",FocusFrameMode.parse("instant",true));assertEquals("moving",FocusFrameMode.parse("bad",true));assertEquals("none",FocusFrameMode.parse("none",true));}
+ @Test public void frameWidthIsBoundedAndLegacyRenderingRemainsAvailable(){assertEquals(0,new TileEffects(true,false,false,false,"white",3).width);assertEquals(8,new TileEffects(true,false,false,false,"white",3,true,1,99).width);assertEquals(4,new TileEffects(true,false,false,true,"dominant",5,true,2,4).width);}
+}

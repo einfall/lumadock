@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="idle_clock_tab">Ruhemodus</string>
+    <string name="idle_clock_title">Bewegte Uhr</string>
+    <string name="idle_clock_description">Startet bei Inaktivität auf dem Home. Videos und HDMI bleiben unberührt.</string>
+    <string name="idle_clock_off">Aus</string>
+    <string name="idle_clock_minutes">Minuten bis zum Start · Aus = nur Vorschau</string>
+    <string name="idle_clock_preview">Uhr als Vorschau starten</string>
+    <string name="idle_clock_protection">Uhr und Datum wechseln jede Minute ihre Position. Eine Fernbedienungstaste führt zurück. Der Philips-OLED-Schutz bleibt aktiv und kann weiterhin sein Logo anzeigen.</string>
+</resources>

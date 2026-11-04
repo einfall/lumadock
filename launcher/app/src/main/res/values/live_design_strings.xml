@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="design_live_hint">Änderungen werden sofort gespeichert und live angezeigt.</string>
+    <string name="sleep_title">Sleeptimer</string>
+    <string name="sleep_inactive">Kein Timer aktiv</string>
+    <string name="sleep_remaining">Noch %1$d:%2$02d min</string>
+    <string name="sleep_service_missing">Der Home-Dienst muss aktiviert und verbunden sein.</string>
+    <string name="sleep_permission_missing">Bitte genaue Alarme für den Launcher erlauben.</string>
+    <string name="sleep_hint">Der TV wechselt nach der gewählten Zeit in Standby – auch bei Apps und HDMI.</string>
+    <string name="sleep_show_icon">Timer-Icon in der oberen Leiste anzeigen</string>
+    <string name="sleep_set">Zeit auswählen  ›</string>
+    <string name="sleep_colors">Orange = aktiv · Rot = letzte 5 Minuten. „Aus“ beendet den Timer. Nach einem Neustart ist der Timer aus.</string>
+    <string name="focus_title">Kacheln &amp; Fokus</string>
+    <string name="focus_shine">Glanz beim aktiven Fokus</string>
+    <string name="focus_edge">Feine Verlaufslinie um die Kacheln</string>
+    <string name="focus_color_title">Rahmenfarbe</string>
+    <string name="focus_color_choice">Rahmenfarbe: %1$s  ›</string>
+    <string-array name="focus_color_names"><item>Bisheriger Rahmen</item><item>Weiß</item><item>Blau</item><item>Cyan</item><item>Violett</item><item>Pink</item><item>Orange</item><item>Rot</item><item>Grün</item><item>Dominante App-Farbe</item></string-array>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apps_manage_button">Sichtbare Apps verwalten  ›</string>
+    <string name="apps_manage_hint">Icon · Name · Auge · Schloss · Verschieben. OK wählt die jeweilige Funktion.</string>
+    <string name="apps_moving_hint">App angehoben: ↑ / ↓ verschieben · OK ablegen · Zurück verwerfen</string>
+    <string name="apps_apply_hint">Die ersten sichtbaren Apps bilden das Dock. Änderungen werden sofort gespeichert.</string>
+    <string name="apps_done">Fertig</string>
+    <string name="apps_pin_title">App-PIN</string>
+    <string name="apps_pin_create">PIN anlegen</string>
+    <string name="apps_pin_change">PIN ändern</string>
+    <string name="apps_pin_remove">PIN entfernen</string>
+    <string name="apps_pin_enter">PIN eingeben</string>
+    <string name="apps_pin_four">Vier Ziffern wählen. Die letzte Ziffer bestätigt automatisch.</string>
+    <string name="apps_pin_confirm">PIN wiederholen</string>
+    <string name="apps_pin_delete">Letzte Ziffer löschen</string>
+    <string name="apps_pin_wait">Bitte %1$d Sekunden warten.</string>
+    <string name="apps_pin_mismatch">Die PINs stimmen nicht überein. Bitte wiederholen.</string>
+    <string name="apps_pin_checking">Wird geprüft …</string>
+    <string name="apps_pin_wrong">Falsche PIN. Bitte erneut versuchen.</string>
+    <string name="apps_pin_blocked">Zu viele Versuche. Bitte 30 Sekunden warten.</string>
+    <string name="apps_icon_for">Icon für %1$s auswählen</string>
+    <string name="apps_rename_for">%1$s umbenennen</string>
+    <string name="apps_hide">%1$s ausblenden</string>
+    <string name="apps_show">%1$s einblenden</string>
+    <string name="apps_lock">%1$s sperren</string>
+    <string name="apps_unlock">%1$s entsperren</string>
+    <string name="apps_move">%1$s verschieben</string>
+    <string name="apps_rename">Name ändern</string>
+    <string name="apps_original">Original</string>
+    <string name="apps_choose_icon">App-Icon auswählen</string>
+    <string name="apps_app_icon">App-Symbol</string>
+    <string name="apps_icon_video">Video</string>
+    <string name="apps_icon_music">Musik</string>
+    <string name="apps_icon_game">Spiele</string>
+    <string name="apps_icon_tv">Fernsehen</string>
+    <string name="apps_icon_star">Favorit</string>
+    <string name="apps_icon_kids">Kinder</string>
+    <string name="apps_icon_photo">Bilder</string>
+    <string name="apps_save_failed">Die Reihenfolge konnte nicht gespeichert werden.</string>
+    <string name="apps_pill_heading">Obere Leiste: Icon + Text anzeigen</string>
+    <string name="apps_pill_inputs">Quellen: Text anzeigen</string>
+    <string name="apps_pill_network">LAN / WLAN: Text anzeigen</string>
+    <string name="apps_pill_settings">Einstellungen: Text anzeigen</string>
+</resources>

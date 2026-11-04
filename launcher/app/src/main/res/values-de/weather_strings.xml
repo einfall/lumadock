@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="weather_tab">OpenWeather</string>
+
+    <string name="design_tab">Design</string>
+
+    <string name="weather_enable">Wetter im Home anzeigen</string>
+
+    <string name="weather_key">OpenWeather-API-Schlüssel</string>
+
+    <string name="weather_key_hint">API-Schlüssel eingeben</string>
+
+    <string name="weather_city">Stadt suchen</string>
+
+    <string name="weather_city_hint">Stadt, z. B. Köln,DE</string>
+
+    <string name="weather_search">Suchen</string>
+
+    <string name="weather_searching">Suche läuft…</string>
+
+    <string name="weather_no_results">Keine Stadt gefunden. Versuche es mit einem Länderkürzel.</string>
+
+    <string name="weather_selected">Ausgewählt: %1$s</string>
+
+    <string name="weather_choose">Wähle eine Stadt aus den Suchergebnissen.</string>
+
+    <string name="weather_missing">Bitte API-Schlüssel eingeben und eine Stadt auswählen.</string>
+
+    <string name="weather_invalid_key">API-Schlüssel ungültig oder noch nicht aktiviert. Bitte bei OpenWeather prüfen.</string>
+
+    <string name="weather_rate_limit">OpenWeather-Anfragelimit erreicht. Bitte später erneut versuchen.</string>
+
+    <string name="weather_network_error">Wetter nicht verfügbar. Internetverbindung prüfen und erneut versuchen.</string>
+
+    <string name="weather_service_error">OpenWeather ist vorübergehend nicht erreichbar.</string>
+
+    <string name="weather_bad_response">Die Wetterantwort konnte nicht gelesen werden.</string>
+
+    <string name="weather_ready">%1$s · %2$s °C · %3$s</string>
+
+    <string name="weather_attribution">Powered by OpenWeather · Celsius</string>
+
+    <string name="weather_loading">Wetter wird geladen…</string>
+
+    <string name="weather_offline">Stand %1$s</string>
+
+    <string name="weather_unavailable">Nicht verfügbar</string>
+
+    <string name="weather_details">%1$s: %2$s °C, %3$s. Gefühlt %4$s °C, Luftfeuchtigkeit %5$s %%, Wind %6$s km/h.</string>
+
+<string name="weather_feels">Gefühlt</string>
+
+<string name="weather_humidity">Luftfeuchtigkeit</string>
+
+<string name="weather_wind">Wind</string>
+
+<string name="weather_updated">Aktualisiert: %1$s</string>
+
+<string name="weather_close">Schließen</string>
+
+<string name="weather_show_city">Stadt im Home anzeigen</string>
+    <string name="weather_interval">Aktualisierungsintervall (Minuten)</string>
+    <string name="weather_interval_choice">Alle %1$d Minuten</string>
+    <string name="weather_interval_hint">Aktualisiert bei sichtbarem Home. Übernehmen speichert die Auswahl.</string>
+</resources>

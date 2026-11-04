@@ -1,0 +1,27 @@
+<resources>
+    <string name="typography_title">Schriften &amp; Icons</string>
+    <string name="typography_menu_hint">Icon-Packs, getrennte Schriften und Vorschau-Menü</string>
+    <string name="typography_icons">APP-ICONS</string>
+    <string name="typography_fonts_title">SCHRIFTARTEN</string>
+    <string name="typography_apps">App-Namen</string>
+    <string name="typography_clock">Uhrzeit auf Home</string>
+    <string name="typography_saver">Uhrzeit im Bildschirmschoner</string>
+    <string name="typography_hint">Jeder Bereich hat seine eigene Schrift. Original behält die bisherige Darstellung. Die Uhr des Schoners wird direkt im Schoner bearbeitet.</string>
+    <string name="typography_choose_hint">Fokus zeigt ein Schriftmuster. OK wählt die Schrift und wendet sie sofort an; die Liste bleibt geöffnet. Mit dem Auge oben siehst du die Vollbild-Vorschau.</string>
+    <string-array name="typography_fonts"><item>Original · bisherige Schrift</item><item>Outfit</item><item>Inter</item><item>Roboto · Android</item><item>Schmale Sans Serif</item><item>Serif</item><item>Monospace</item><item>Handschrift</item><item>Inter Display Thin</item><item>Inter Light</item><item>Inter Bold</item><item>Big Shoulders Display</item><item>Abril Fatface</item><item>Oregano</item><item>Kenia</item><item>DSEG7 · Digitalziffern</item><item>Monoton · Linien</item><item>DM Sans · Projectivy</item><item>Roboto Medium</item><item>Pixelify Sans · Pixel</item></string-array>
+    <string name="visual_menu_title">MENÜ &amp; VORSCHAU</string>
+    <string name="visual_menu_compact">Schmale Menüansicht</string>
+    <string name="visual_menu_compact_hint">Mehr Platz für die Live-Vorschau auf Home</string>
+    <string name="visual_preview">Vollbild-Vorschau</string>
+    <string name="visual_preview_hint">Menü kurz ausblenden · auch mit der Menü-Taste</string>
+    <string name="visual_preview_return">Vorschau · OK / Zurück: zum selben Menü</string>
+    <string name="iconpacks_title">Icon-Packs</string>
+    <string name="iconpacks_hint">Installierte Android-Icon-Packs mit Bildvorschau</string>
+    <string name="iconpacks_original">Original · bisherige App-Bilder</string>
+    <string name="iconpacks_empty">Noch kein unterstütztes Icon-Pack installiert. Installiere beispielsweise Arcticons oder Lawnicons auf dem TV und öffne diese Auswahl erneut.</string>
+    <string name="iconpacks_behavior">Nur statische Icons aus appfilter.xml werden gelesen. Nicht enthaltene Apps behalten ihr bisheriges Bild. Eigene App-Symbole haben Vorrang. Das Icon-Pack wird nicht gestartet.</string>
+    <string name="iconpacks_error">Dieses Icon-Pack enthält keine lesbare appfilter.xml. Deine Auswahl bleibt erhalten.</string>
+    <string name="iconpacks_loading">Icon-Vorschau wird geladen …</string>
+    <string name="iconpacks_count">%1$d Icon-Zuordnungen · OK zum Übernehmen</string>
+    <string name="visual_photo_preview">Bildvorschau</string>
+</resources>

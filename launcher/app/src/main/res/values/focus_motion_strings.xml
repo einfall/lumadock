@@ -1,0 +1,11 @@
+<resources>
+    <string name="motion_title">Fokus-Bewegung &amp; Zoom</string>
+    <string name="motion_button">Fokus-Bewegung &amp; Zoom ›</string>
+    <string name="motion_hint">Ohne mitwandernden Fokusrahmen bewegt sich nur die App-Kachel. Deine Rahmen- und Glaseinstellungen bleiben gespeichert.</string>
+    <string name="motion_overlay">Mitwandernden Fokusrahmen anzeigen</string>
+    <string name="motion_zoom">App-Kachel vergrößern (Zoom)</string>
+    <string name="motion_in">Zoom-in animieren</string>
+    <string name="motion_out">Zoom-out animieren</string>
+    <string name="motion_bounce">Bounce beim Zoom-in und Zoom-out</string>
+    <string name="motion_note">Ohne Animation wechselt die Größe sofort. Bounce federt kurz über das Ziel hinaus und kommt zur Ruhe. Wetter und obere Leiste behalten ihre eigene Fokus-Anzeige.</string>
+</resources>

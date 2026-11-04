@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="system_stats_title">Systemanzeige</string>
+    <string name="system_stats_menu_hint">CPU, RAM und interner Speicher · optional auf Home</string>
+    <string name="system_stats_show">Systemanzeige einblenden</string>
+    <string name="system_stats_position">Kompakte Kacheln unter Uhr, Wetter und Datum</string>
+    <string name="system_stats_values">Werte einzeln anzeigen</string>
+    <string name="system_stats_cpu">CPU</string>
+    <string name="system_stats_ram">RAM</string>
+    <string name="system_stats_storage">Speicher</string>
+    <string name="system_stats_cpu_hint" formatted="false">Gesamte CPU-Auslastung, 0–100 %</string>
+    <string name="system_stats_ram_hint">Belegter und gesamter Arbeitsspeicher des TVs</string>
+    <string name="system_stats_storage_hint">Freier interner App-Speicher, keine USB-Laufwerke</string>
+    <string name="system_stats_refresh">Aktualisierung</string>
+    <string name="system_stats_interval">Intervall in Sekunden</string>
+    <string name="system_stats_behavior" formatted="false">Aktualisiert nur auf Home bei eingeschaltetem Bildschirm. Zusätzliche Instanzen unter Widgets verwalten sind unabhängig vom Hauptschalter. Wenn alle eigenen Widgets aus sind, stoppen die Abfragen. Blau: unter 75 % belegt, Orange: ab 75 %, Rot: ab 90 %. CPU nutzt bei gesperrtem Android-Zugriff die bereits autorisierte lokale ADB-Verbindung. Ohne Zugriff erscheint ein Strich. Keine zusätzliche Berechtigung, kein externer Server.</string>
+    <string name="system_stats_cpu_detail">Gesamte CPU · Auslastung</string>
+    <string name="system_stats_cpu_missing">CPU-Zugriff nicht verfügbar</string>
+    <string name="system_stats_unavailable">Nicht verfügbar</string>
+    <string name="system_stats_loading">Wird gelesen …</string>
+    <string name="system_stats_of">%1$s / %2$s</string>
+    <string name="system_stats_free">%1$s frei</string>
+    <string name="system_stats_used">%1$d %% belegt</string>
+    <string name="system_stats_total">%1$d %% belegt · %2$s gesamt</string>
+</resources>

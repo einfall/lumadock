@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="volume_style_title">Volume animations</string>
+    <string name="volume_style_hint">Inspired by manufacturer designs</string>
+    <string name="volume_style_setting">Volume style: %1$s  ›</string>
+    <string name="volume_style_glass">Glass</string>
+    <string name="volume_style_sony">Sony style</string>
+    <string name="volume_style_lg">LG style</string>
+    <string name="volume_style_philips">Philips style</string>
+    <string name="volume_style_samsung">Samsung style</string>
+    <string name="volume_style_sample">Sample values only · your volume stays unchanged. Save with Apply in Design.</string>
+    <string name="volume_style_done">Done</string>
+    <string name="volume_muted_label">Muted</string>
+</resources>

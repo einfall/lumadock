@@ -1,0 +1,36 @@
+<resources>
+    <string name="live_title">Live-Hintergründe</string>
+    <string name="live_menu_hint">Live-Hintergründe, Datei / URL und Aerials-Vorgaben</string>
+    <string name="live_enabled">Live-Hintergrund aktiv</string>
+    <string name="live_enabled_hint">Aus zeigt wieder deinen bisherigen Hintergrund.</string>
+    <string name="live_source">LIVE-HINTERGRÜNDE · QUELLE</string>
+    <string name="live_presets">Live-Hintergründe auswählen</string>
+    <string name="live_presets_hint">Aerials von Apple, Amazon und der Community</string>
+    <string name="live_custom">Dateipfad / Video-URL eingeben</string>
+    <string name="live_custom_hint">Pfad auf dem TV, content:// oder HTTP / HTTPS</string>
+    <string name="live_file">Videodatei auswählen</string>
+    <string name="live_file_hint">Datei über die Android-Dateiauswahl freigeben</string>
+    <string name="live_dim">Abdunklung (%)</string>
+    <string name="live_behavior">Videos laufen stumm in Schleife. Außerhalb von Home und bei ausgeschaltetem Bildschirm stoppt die Wiedergabe. Bei einem Fehler bleibt dein bisheriger Hintergrund sichtbar.</string>
+    <string name="live_network_hint">Online-Videos werden erst nach deiner Auswahl direkt vom jeweiligen Anbieter gestreamt. Es werden keine Videos mitgeliefert.</string>
+    <string name="live_catalog_hint">Eigene Vorgaben können in dieser Datei bearbeitet werden:</string>
+    <string name="live_all">Alle Live-Hintergründe</string>
+    <string name="live_search">Nach Name suchen</string>
+    <string name="live_search_hint">Zum Beispiel Hawaii, London, Ocean oder Space</string>
+    <string name="live_page">%1$d–%2$d von %3$d Live-Hintergründen</string>
+    <string name="live_next">Weitere Live-Hintergründe ›</string>
+    <string name="live_previous">‹ Vorherige Live-Hintergründe</string>
+    <string name="live_use">Übernehmen</string>
+    <string name="live_path_hint">Direkte Video-URL oder lesbarer Pfad auf dem TV. Lokale Dateien am einfachsten über „Videodatei auswählen“ oder im App-Dateiordner ablegen.</string>
+    <string name="live_file_unreadable">Auf diese Datei besteht kein Zugriff. Bitte die Videodatei über die Dateiauswahl freigeben.</string>
+    <string name="live_invalid">Bitte einen gültigen und erreichbaren Video-Pfad oder eine direkte Video-URL eingeben.</string>
+    <string name="live_no_picker">Dieser TV bietet keine Dateiauswahl an. Bitte einen lesbaren Dateipfad oder eine Video-URL eingeben.</string>
+    <string name="live_own">Eigener Live-Hintergrund</string>
+    <string name="live_no_source">Noch kein Live-Hintergrund ausgewählt</string>
+    <string name="live_playing">Wiedergabe läuft · stumm</string>
+    <string name="live_loading">Video wird vorbereitet …</string>
+    <string name="live_error">Video nicht abspielbar. Bitte Quelle, Zugriff und Format prüfen; MP4 / H.264 wird empfohlen.</string>
+    <string name="live_paused">Pausiert – Home ist im Hintergrund</string>
+    <string name="live_off">Aus – bisheriger Hintergrund</string>
+    <string name="live_clear">Leeren</string>
+</resources>

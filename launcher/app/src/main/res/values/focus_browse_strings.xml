@@ -1,0 +1,18 @@
+<resources>
+    <string name="focus_frame_mode">Fokusrahmen</string>
+    <string name="focus_frame_none">Kein Fokusrahmen · nur App-Zoom</string>
+    <string name="focus_frame_moving">Mitwandernder Fokusrahmen</string>
+    <string name="focus_frame_fade">Beim App-Wechsel aus- und einblenden</string>
+    <string name="focus_frame_instant">Sofort &amp; dauerhaft · ohne Überblendung</string>
+    <string name="focus_frame_hint">Mitwandernd: Der Rahmen gleitet zur nächsten App. Sofort &amp; dauerhaft: Er erscheint direkt an der gewählten App und bleibt sichtbar. Einblenden: Der alte Rahmen verschwindet kurz; ein neuer wird eingeblendet. Ohne Rahmen bleibt der App-Zoom separat einstellbar.</string>
+    <string name="focus_frame_width">Fokusrahmen-Stärke (Pixel)</string>
+    <string name="dock_browse_title">Dock-Navigation</string>
+    <string name="dock_browse_menu_hint">Paging oder fester Fokusplatz (Pivot)</string>
+    <string name="dock_browse_hint">Gilt für „Nur Dock – alle Apps in einer Zeile“. Die Anzahl der sichtbaren Plätze folgt der Dock-Größe. App-Reihenfolge, Wrap-around und Positions-Pille bleiben separat einstellbar.</string>
+    <string name="dock_browse_mode">Browsing-Modus</string>
+    <string name="dock_browse_edge">Klassisch · am Rand weiterschieben</string>
+    <string name="dock_browse_paging">Paging · ganze Seiten wechseln</string>
+    <string name="dock_browse_pivot_name">Pivot · fester Fokusplatz</string>
+    <string name="dock_browse_pivot">Pivot-Platz (von links / im Raster von vorn)</string>
+    <string name="dock_browse_pivot_hint">Von Platz 1 bis zum gewählten Platz wandert der Fokus. Danach gleiten die Apps unter diesem Platz weiter – auch am Ende. Beispiel: Bei fünf Dock-Plätzen hält Platz 3 den Fokus in der Mitte. Die Einstellung wirkt nur im Pivot-Modus.</string>
+</resources>

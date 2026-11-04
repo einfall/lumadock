@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="idle_clock_tab">Idle clock</string>
+    <string name="idle_clock_title">Moving clock</string>
+    <string name="idle_clock_description">Starts after inactivity on Home. Videos and HDMI are unaffected.</string>
+    <string name="idle_clock_off">Off</string>
+    <string name="idle_clock_minutes">Minutes until automatic start · Off = preview only</string>
+    <string name="idle_clock_preview">Preview clock</string>
+    <string name="idle_clock_protection">Clock and date move every minute. Press a remote button to return. The Philips OLED protection stays active and may still show its logo.</string>
+</resources>

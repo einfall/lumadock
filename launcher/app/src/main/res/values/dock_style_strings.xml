@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="outline_contrast">Kontrastkontur hell / dunkel</string>
+    <string name="outline_width">Stärke der Kontrastkontur (Pixel)</string>
+    <string name="outline_hint">Eine zusätzliche Kontur folgt dem Rahmen: helle Linien bekommen einen dunklen Saum, dunkle Linien einen hellen. Die gewählte Rahmenfarbe bleibt erhalten. Getrennt für Apps mit und ohne Fokus; sichtbar, sobald Rahmen oder Verlaufslinie an ist.</string>
+    <string name="dock_style_title">Dock-Design</string>
+    <string name="dock_style_hint">Farben, Transparenz, Kontur und Apple-Glas-Look</string>
+    <string name="dock_style_visible">Dock-Fläche anzeigen</string>
+    <string name="dock_style_material">Stil</string>
+    <string name="dock_style_legacy">Bisheriger Look</string>
+    <string name="dock_style_solid">Einfarbig</string>
+    <string name="dock_style_gradient">Farbverlauf</string>
+    <string name="dock_style_glass">Apple-Glas</string>
+    <string name="dock_style_quickaccess">QuickAccess-Glas</string>
+    <string name="dock_style_quickaccess_hint">Weiße Glasfläche mit 14 % Deckkraft, feiner Kontur und weichem Schatten. Eigene Farben, Transparenz und Rundung; deine anderen Dock-Stile bleiben erhalten.</string>
+    <string name="dock_style_material_hint">Apple-Glas nutzt Lichtverläufe, eine transparente Fläche und feine Reflexe. Ohne Blur oder zusätzliche Animation. „Bisheriger Look“ zeigt das bestehende Dock; eine Farb- oder Regleränderung aktiviert ein eigenes Design.</string>
+    <string name="dock_style_colors">Fläche und Farben</string>
+    <string name="dock_style_top">Grundfarbe / Verlauf oben</string>
+    <string name="dock_style_bottom">Verlauf unten / Glasfarbton</string>
+    <string name="dock_style_transparency">Flächentransparenz (%)</string>
+    <string name="dock_style_gloss">Glasreflexe anzeigen</string>
+    <string name="dock_style_gloss_hint">Zusätzlicher Lichtschimmer beim Stil Apple-Glas</string>
+    <string name="dock_style_shape">Form und Kontur</string>
+    <string name="dock_style_radius">Rundung (dp)</string>
+    <string name="dock_style_rim">Dock-Kontur anzeigen</string>
+    <string name="dock_style_rim_color">Farbe der Dock-Kontur</string>
+    <string name="dock_style_rim_strength">Stärke der Dock-Kontur (%)</string>
+    <string name="dock_style_behavior" formatted="false">Flächentransparenz: 0 % deckend, 100 % ohne Fläche. Kontur hat eine eigene Sichtbarkeit und Deckkraft. Einfarbig nutzt die Grundfarbe; Farbverlauf und Apple-Glas beide Farben. Alle Änderungen erscheinen sofort, ohne App-Reihenfolge, Raster oder Fokus zu verändern.</string>
+    <string name="dock_style_reset">Dock-Design zurücksetzen</string>
+    <string name="dock_style_reset_hint">Nur Farben und Material zurück auf den bisherigen Look</string>
+    <string name="dock_style_custom_color">Eigene Farbe eingeben …</string>
+    <string name="dock_style_hex_hint">Hex-Farbe mit 6 Stellen, z. B. #24354A. Transparenz wird separat eingestellt.</string>
+    <string name="dock_style_hex_error">Bitte genau 6 Hex-Stellen eingeben, optional mit #.</string>
+    <string name="dock_style_clear">Leeren</string>
+    <string name="dock_style_use">Farbe übernehmen</string>
+    <string-array name="dock_style_color_names"><item>Graphit</item><item>Schwarz</item><item>Dunkles Schieferblau</item><item>Weiß</item><item>Silbergrau</item><item>Blau</item><item>Petrol</item><item>Violett</item><item>Rosé</item><item>Salbeigrün</item><item>Kupfer</item><item>Korallrot</item></string-array>
+</resources>

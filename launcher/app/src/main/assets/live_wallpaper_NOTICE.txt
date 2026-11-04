@@ -1,0 +1,8 @@
+Catalog: live_wallpaper.json
+Source: https://github.com/conreo/couchy-launcher/blob/main/app/src/main/assets/aerials.json
+Copyright (C) 2026 the Couchy Launcher contributors
+Catalog supplied with original source license GNU GPL v3. See live_wallpaper_LICENSE.txt.
+Only title/URL/source metadata is bundled; no footage is distributed.
+Videos remain content of Apple, Amazon, and the respective community creators.
+Fetched 2026-10-29. Playback requires choosing a video.
+Launcher playback/settings code is implemented independently.

@@ -1,0 +1,20 @@
+<resources>
+<string name="live_favorites">Favoriten</string>
+<string name="live_favorite">Favorit</string>
+<string name="live_selected">Ausgewählt</string>
+<string name="live_browse_keys">OK: auswählen · OK ca. 2 Sekunden halten: Favorit ein / aus</string>
+<string name="live_favorites_empty">Noch keine Live-Hintergründe in dieser Liste. In einer Sammlung OK ca. 2 Sekunden halten, um Favoriten hinzuzufügen.</string>
+<string name="live_random">Zufallswechsel</string>
+<string name="live_random_hint">Favoriten oder Kategorie · mehrere Wechsel-Auslöser kombinieren</string>
+<string name="live_random_source">Zufalls-Auswahl aus</string>
+<string name="live_random_category">Zuletzt geöffnete Kategorie</string>
+<string name="live_random_multiple_hint">Mehrere Auslöser können gleichzeitig aktiv sein. Aus schaltet alle ab. Bei einem TV-Start mit gleichzeitiger Home-Rückkehr wird nur einmal gewechselt.</string>
+<string name="live_random_mode">Wann wechseln?</string>
+<string name="live_random_interval">Nach Zeitintervall</string>
+<string name="live_random_home">Beim Öffnen von Home</string>
+<string name="live_random_tv">Beim Einschalten / TV-Start</string>
+<string name="live_random_minutes">Intervall (Minuten)</string>
+<string name="live_random_now">Jetzt zufällig wechseln</string>
+<string name="live_random_empty">Die gewählte Liste ist leer. Bitte zuerst Favoriten hinzufügen oder eine andere Kategorie wählen.</string>
+<string name="live_random_behavior">Die Auslöser sind kombinierbar; Aus deaktiviert alle. Zeitintervall: nur auf Home, beim Zurückkehren einmal nachholen. Home: auch bei Rückkehr aus einer App. TV: beim Einschalten aus Standby oder nach einem Neustart. Außerhalb von Home läuft kein Video. Bei mehreren Videos wird das aktuelle nicht direkt wiederholt.</string>
+</resources>

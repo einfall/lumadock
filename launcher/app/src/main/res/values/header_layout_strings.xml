@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="header_title">Kopfzeile anordnen</string>
+    <string name="header_menu_hint">Uhr, Begrüßung, Datum, Wetter und System-Pills frei platzieren</string>
+    <string name="header_preset">Anordnung auswählen</string>
+    <string name="header_legacy">Bisherige Anordnung · Uhr / Wetter / Datum</string>
+    <string name="header_row">Uhrzeit – Datum – Wetter nebeneinander</string>
+    <string name="header_stack">Datum unter Uhrzeit · Wetter daneben</string>
+    <string name="header_preset_hint">Eine Vorlage setzt nur die Positionen zurück. Sichtbarkeit, Wetterdaten und System-Messwerte bleiben erhalten. Danach kannst du jedes Element einzeln verschieben.</string>
+    <string name="header_items">Elemente</string>
+    <string name="header_show">Element anzeigen</string>
+    <string name="header_move">Direkt auf Home verschieben</string>
+    <string name="header_move_hint">Pfeiltasten bewegen · OK speichert · Zurück verwirft</string>
+    <string name="header_move_keys">Pfeiltasten: %1$d dp · OK: speichern · Zurück / Exit: abbrechen</string>
+    <string name="header_show_first">Bitte das Element zuerst einblenden. Wetter benötigt zusätzlich eine konfigurierte Stadt.</string>
+    <string name="header_x">Position X (von links)</string>
+    <string name="header_y">Position Y (von oben)</string>
+    <string name="header_step">Schrittweite beim Verschieben (dp)</string>
+    <string name="header_reset">Alle Positionen zurücksetzen</string>
+    <string name="header_reset_hint">Bisherige Anordnung wiederherstellen; Sichtbarkeit behalten</string>
+    <string name="header_reset_item">Position dieses Elements zurücksetzen</string>
+    <string name="header_reset_item_hint">Zur Position in der gewählten Vorlage</string>
+    <string name="header_units">Positionen in dp, relativ zum ganzen Bildschirm. Jedes Element bleibt innerhalb der Bildschirmränder. Anzeigen und Ausblenden ändert keine gespeicherten Positionen.</string>
+    <string name="header_live_hint">Alle Änderungen erscheinen live. Begrüßung, Uhrzeit, Datum und Wetter sind unabhängig. CPU, RAM und Speicher nutzen dieselben Sichtbarkeitsschalter wie die Systemanzeige.</string>
+    <string name="header_position_on">Sichtbar · X %1$d / Y %2$d</string>
+    <string name="header_position_off">Ausgeblendet · X %1$d / Y %2$d</string>
+    <string-array name="header_item_names"><item>Begrüßung – Hallo Du</item><item>Uhrzeit</item><item>Wochentag und Datum</item><item>Wetter</item><item>CPU-Pill</item><item>RAM-Pill</item><item>Speicher-Pill</item></string-array>
+</resources>

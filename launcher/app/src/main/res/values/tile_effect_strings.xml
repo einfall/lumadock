@@ -1,0 +1,23 @@
+<resources>
+    <string name="sleep_countdown_title">TV geht in Standby</string>
+    <string name="effects_idle">Ohne Fokus – App-Kacheln ›</string>
+    <string name="effects_focus">Mit Fokus – ausgewählte App ›</string>
+    <string name="effects_idle_title">App-Kacheln ohne Fokus</string>
+    <string name="effects_focus_title">Ausgewählte App mit Fokus</string>
+    <string name="effects_hint">Alles wird sofort angewendet. Glanz läuft beim Erscheinen oder Fokuswechsel einmal über die Kachel.</string>
+    <string name="effects_frame">Rahmen anzeigen</string>
+    <string name="effects_glass">Glasfläche mit Schimmer</string>
+    <string name="effects_shine">Bewegter Glanz</string>
+    <string name="effects_edge">Feine Verlaufslinie</string>
+    <string name="effects_gap">Rahmenabstand zum App-Bild</string>
+    <string name="effects_gap_hint">0–5 Bildschirm-Pixel · Abstand gilt auch für die dominante App-Farbe.</string>
+    <string name="effects_nuvio">Nuvio-Coverlinie · 1 dp</string>
+    <string name="effects_nuvio_hint">Weiße, feine Innenkante: oben 28 %, mittig 9,24 %, unten transparent. Bleibt direkt am App-Bild, auch ohne mitwandernden Rahmen.</string>
+    <string name="effects_glow">Kleinen Rahmen-Glow anzeigen</string>
+    <string name="effects_glow_hint">Sanftes Licht in der gewählten Rahmenfarbe. Unabhängig von Glasfläche und Glanz.</string>
+    <string name="effects_glow_strength">Glow-Stärke (%)</string>
+    <string name="effects_glow_spread">Glow-Breite (Pixel)</string>
+    <string name="effects_geometry">Rahmen und Abstand</string>
+    <string name="effects_gap_pixels">Rahmenabstand zum App-Bild (Pixel)</string>
+    <string name="effects_geometry_hint">Stärke 1–8 und freier Abstand 0–5 Bildschirm-Pixel. Gilt für alle aktiven Fokusrahmen-Arten. Die Nuvio-Innenkante bleibt separat 1 dp fein.</string>
+</resources>

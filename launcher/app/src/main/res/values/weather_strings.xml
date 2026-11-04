@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weather_tab">OpenWeather</string>
+    <string name="design_tab">Design</string>
+    <string name="weather_enable">Show weather on Home</string>
+    <string name="weather_key">OpenWeather API key</string>
+    <string name="weather_key_hint">Enter API key</string>
+    <string name="weather_city">Search for a city</string>
+    <string name="weather_city_hint">City, e.g. Cologne,DE</string>
+    <string name="weather_search">Search</string>
+    <string name="weather_searching">Searching…</string>
+    <string name="weather_no_results">No cities found. Try adding a country code.</string>
+    <string name="weather_selected">Selected: %1$s</string>
+    <string name="weather_choose">Choose a city from the search results.</string>
+    <string name="weather_missing">Enter an API key and choose a city first.</string>
+    <string name="weather_invalid_key">API key invalid or not activated. Check your OpenWeather account.</string>
+    <string name="weather_rate_limit">OpenWeather request limit reached. Please try again later.</string>
+    <string name="weather_network_error">Weather unavailable. Check the internet connection and try again.</string>
+    <string name="weather_service_error">OpenWeather is temporarily unavailable.</string>
+    <string name="weather_bad_response">The weather response could not be read.</string>
+    <string name="weather_ready">%1$s · %2$s°C · %3$s</string>
+    <string name="weather_attribution">Powered by OpenWeather · Celsius</string>
+    <string name="weather_loading">Loading weather…</string>
+    <string name="weather_offline">Updated %1$s</string>
+    <string name="weather_unavailable">Unavailable</string>
+    <string name="weather_details">%1$s: %2$s°C, %3$s. Feels like %4$s°C, humidity %5$s%%, wind %6$s km/h.</string>
+<string name="weather_feels">Feels like</string>
+<string name="weather_humidity">Humidity</string>
+<string name="weather_wind">Wind</string>
+<string name="weather_updated">Updated: %1$s</string>
+<string name="weather_close">Close</string>
+<string name="weather_show_city">Show city name on Home</string>
+    <string name="weather_interval">Refresh interval (minutes)</string>
+    <string name="weather_interval_choice">Every %1$d minutes</string>
+    <string name="weather_interval_hint">Refreshes while Home is visible. Apply saves your choice.</string>
+</resources>

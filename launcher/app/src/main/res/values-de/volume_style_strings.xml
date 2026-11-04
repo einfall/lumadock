@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="volume_style_title">Lautstärke-Animationen</string>
+    <string name="volume_style_hint">An Hersteller-Designs angelehnte Varianten</string>
+    <string name="volume_style_setting">Lautstärke-Stil: %1$s  ›</string>
+    <string name="volume_style_glass">Glas</string>
+    <string name="volume_style_sony">Sony-Stil</string>
+    <string name="volume_style_lg">LG-Stil</string>
+    <string name="volume_style_philips">Philips-Stil</string>
+    <string name="volume_style_samsung">Samsung-Stil</string>
+    <string name="volume_style_sample">Vorschau mit Beispielwerten · Lautstärke bleibt unverändert. Im Design mit Übernehmen speichern.</string>
+    <string name="volume_style_done">Fertig</string>
+    <string name="volume_muted_label">Stumm</string>
+</resources>

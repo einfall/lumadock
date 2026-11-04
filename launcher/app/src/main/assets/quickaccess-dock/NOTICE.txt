@@ -1,0 +1,6 @@
+QuickAccess-Glas: native adaptation of the #dock material from QuickAccess TV.
+Source: https://github.com/Ricardo-Manzanares/QuickAccessTV/blob/e448a1880b7ed0fc72c9d9a54f9003ffa9db7e45/web/css/home.css
+MIT, Copyright (c) 2026 QuickAccess TV contributors (LICENSE.txt).
+
+Reference at 1920x1080: rgba(255,255,255,0.14) fill, 2px rgba(255,255,255,0.18) border, 52px corner radius, 0 20px 50px rgba(0,0,0,0.18) shadow.
+The native launcher preserves its own dock layout and navigation. Reference dimensions map to 26dp corners, a 1dp border, 10dp shadow offset and 25dp shadow softness at the launcher's 1080p density. The shadow is cached as an alpha mask; the wallpaper is not blurred. This is an Android Canvas adaptation of a CSS material, not a WebView renderer.

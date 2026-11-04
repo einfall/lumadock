@@ -1,0 +1,16 @@
+<resources>
+<string name="dock_focus_master_hint">Rahmen, Glas und Glanz sind unten getrennt einstellbar. Der mitwandernde Fokusrahmen muss eingeschaltet sein, damit diese Fokus-Effekte sichtbar werden.</string>
+<string name="dock_rows_hint">0: keine Kacheln unter dem Dock, Dock unten. 1: Anfang der nächsten Reihe sichtbar. 2–3: jeweils eine weitere Reihe. Mit Unten erreichst du die übrigen Apps weiterhin.</string>
+<string name="dock_sort">Dock-Sortierung</string>
+<string name="dock_sort_custom">Eigene Reihenfolge</string>
+<string name="dock_sort_name">Nach Name (A–Z)</string>
+<string name="dock_sort_installed">Zuletzt installiert</string>
+<string name="dock_sort_frequent">Am häufigsten geöffnet</string>
+<string name="dock_sort_hint">Sortiert die Apps deines Docks. Im Modus „Nur Dock“ werden alle sichtbaren Apps sortiert. Deine eigene Reihenfolge bleibt gespeichert. Häufigkeit zählt ab jetzt erfolgreiche Starts über diesen Launcher; PIN-Abbrüche zählen nicht.</string>
+<string name="dock_only">Nur Dock – alle Apps in einer Zeile</string>
+<string name="dock_only_hint">Links / Rechts scrollt durch alle sichtbaren Apps. Oben führt zur Hauptleiste.</string>
+<string name="dock_wrap">Am Ende wieder von vorne</string>
+<string name="dock_wrap_hint">Im Modus „Nur Dock“ vom letzten zum ersten App-Icon wechseln und umgekehrt.</string>
+<string name="dock_counter">Positions-Pille anzeigen</string>
+<string name="dock_counter_hint">Im Modus „Nur Dock“ die Position anzeigen, zum Beispiel 1 / 20.</string>
+</resources>

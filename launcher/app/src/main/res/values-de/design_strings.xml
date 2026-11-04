@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="design_title">Design &amp; Apps</string>
+    <string name="design_columns">Apps pro Reihe</string>
+    <string name="design_rows">Sichtbare Reihen unter dem Dock</string>
+    <string name="design_apps">Sichtbare Apps</string>
+    <string name="design_hint">Häkchen = im Home anzeigen. Ausgeblendete Apps bleiben installiert.</string>
+    <string name="design_apply">Übernehmen</string>
+    <string name="design_cancel">Abbrechen</string>
+<string name="design_dock_columns">Dock-Plätze</string>
+<string name="design_grid_columns">Apps pro Rasterreihe</string>
+</resources>

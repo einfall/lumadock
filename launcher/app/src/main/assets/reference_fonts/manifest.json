@@ -1,0 +1,75 @@
+[
+  {
+    "id": "big_shoulders",
+    "name": "Big Shoulders Display",
+    "apk": "at4k-v1.3",
+    "source_path": "res/-Y.ttf",
+    "sha256": "75af0d7b81b36e0899c648e3ef8bbf066480687fdc84bc76cf14520941554385",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "abril",
+    "name": "Abril Fatface",
+    "apk": "at4k-v1.3",
+    "source_path": "res/3A.ttf",
+    "sha256": "0754b852943f4dfcf2623733407b231bff1c7e64b7baa3c398f697bd207cdb3b",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "oregano",
+    "name": "Oregano",
+    "apk": "at4k-v1.3",
+    "source_path": "res/Yy.ttf",
+    "sha256": "bacc4de87d5b8bb4490a154b522115dd5107accd659c59e56aa71c8ed46b7d74",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "kenia",
+    "name": "Kenia",
+    "apk": "at4k-v1.3",
+    "source_path": "res/bs.ttf",
+    "sha256": "4052e03cdabd35ef9f739fdf1462b1b26c16b2238ba27223238624a2bb5565b9",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "dseg",
+    "name": "DSEG7 Modern Mini",
+    "apk": "at4k-v1.3",
+    "source_path": "res/q0.ttf",
+    "sha256": "0a774684184b512a076d500de7246b494d44908087f0d1d7ee1dee2e5fa574db",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "monoton",
+    "name": "Monoton",
+    "apk": "at4k-v1.3",
+    "source_path": "res/q2.ttf",
+    "sha256": "951c4cea65ffede784a7c9672feec5d329a7e1e12216c42d53ecf36c90d04dea",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "dm_sans",
+    "name": "DM Sans",
+    "apk": "projectivy-4.73",
+    "source_path": "res/Sd.ttf",
+    "sha256": "a023f465d2f26d8f56c6e3cac6aece08b7a66eb75b4d75eeef9df838c53c81f6",
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "id": "material_outlined",
+    "name": "Material Icons Outlined",
+    "apk": "projectivy-4.73",
+    "source_path": "res/Dm.ttf",
+    "sha256": "4d3af592ae8afad3e5fbd99fa7ee6888acd5524566df4bcad19e30f0bfb025e6",
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "pixelify_sans",
+    "name": "Pixelify Sans",
+    "source_url": "https://github.com/google/fonts/tree/main/ofl/pixelifysans",
+    "source_path": "ofl/pixelifysans/PixelifySans[wght].ttf",
+    "sha256": "9ba86cd010a4de309d263ceff8e8044092c9db7efda869620cb9ff1c4389e8a5",
+    "license": "SIL-OFL-1.1",
+    "license_file": "pixelify_sans-OFL.txt"
+  }
+]

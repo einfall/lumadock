@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Explicit user-provided HTTP video URLs (including local media servers) are supported. -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors><certificates src="system" /></trust-anchors>
+    </base-config>
+    <!-- Apple's video CDN uses its own PKI. Trust the official Apple root only for this exact host.
+         TLS signatures, certificate expiry and hostname validation stay enabled. -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">sylvan.apple.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/apple_inc_root" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

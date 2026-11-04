@@ -1,0 +1,37 @@
+Big Shoulders Display
+Copyright 2019 The Big Shoulders Project Authors (https://github.com/xotypeco/big_shoulders)
+Source: at4k-v1.3 / res/-Y.ttf
+
+Abril Fatface
+Copyright (c) 2011, Copyright (c) 2011, TypeTogether (www.type-together.com), with Reserved Font Names "Abril" and "Abril Fatface"
+Source: at4k-v1.3 / res/3A.ttf
+
+Oregano
+
+Source: at4k-v1.3 / res/Yy.ttf
+
+Kenia
+Copyright (c) 2010, Julia Petretta (julia.petretta@googlemail.com), with Reserved Font Name Kenia
+Source: at4k-v1.3 / res/bs.ttf
+
+DSEG7 Modern Mini
+Created by Keshikan
+with FontForge 2.0 (http://fontforge.sf.net)
+Source: at4k-v1.3 / res/q0.ttf
+
+Monoton
+Copyright (c) 2011 by vernon adams. All rights reserved.
+Source: at4k-v1.3 / res/q2.ttf
+
+DM Sans
+Copyright 2014 The DM Sans Project Authors (https://github.com/googlefonts/dm-fonts)
+Source: projectivy-4.73 / res/Sd.ttf
+
+Material Icons Outlined
+Copyright 2019 Google LLC. All Rights Reserved.
+Source: projectivy-4.73 / res/Dm.ttf
+
+
+Pixelify Sans
+Source: https://github.com/google/fonts/tree/main/ofl/pixelifysans
+Original variable font, unchanged. License: pixelify_sans-OFL.txt (SIL OFL 1.1).

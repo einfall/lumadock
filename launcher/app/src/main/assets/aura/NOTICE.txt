@@ -1,0 +1,12 @@
+Adapted scenes from Aura TV, MIT, Copyright (c) 2026 iravi.
+Source: https://github.com/cookedzera/aura-tv/tree/d903ee98adca4bb6fe23ef3b65b47b2b7af10e37
+The original scene code has been adapted for this launcher's lifecycle, preferences, image sources, download limits and error handling.
+The full Aura MIT license is in ../saver_photos/AURA_LICENSE.txt.
+
+Sky catalogue: XHIP Hipparcos compilation (Anderson & Francis 2012), constellation figures after IAU, via d3-celestial by Olaf Frohn (BSD-3-Clause; LICENSE-d3-celestial.txt). Planet positions use NASA JPL approximate Keplerian elements. Sky assets are unchanged from the pinned Aura revision.
+Map: Natural Earth public-domain land/borders, unchanged Aura assets.
+Wind data: Open-Meteo, CC BY 4.0, https://open-meteo.com/ and https://creativecommons.org/licenses/by/4.0/ . The animated display derives vector trails from these data.
+Museum: public-domain/CC0 artworks from the Art Institute of Chicago open-access collection, https://www.artic.edu/open-access/open-access-policy . Artwork titles and artists remain visible in the scene.
+ISS clips: NASA Johnson Space Center / International Space Station crews, public domain, through Wikimedia Commons. Exact filenames and captions remain in Flyovers.CLIPS; the scene displays NASA attribution.
+Typography: Inter by Rasmus Andersson, SIL Open Font License (fonts/LICENSE-Inter.txt).
+Built-in mosaic photos retain their individual licenses and authors in ../saver_photos/photos.json and on each tile.

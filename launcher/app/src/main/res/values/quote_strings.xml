@@ -1,0 +1,19 @@
+<resources>
+    <string name="quote_title">Spruch des Tages</string>
+    <string name="quote_display">Darstellung</string>
+    <string name="quote_transition">Übergang</string>
+    <string name="quote_font">Schrift mit Vorschau · Text</string>
+    <string name="quote_size">Schriftgröße · Text</string>
+    <string name="quote_interval">Neuen Spruch laden · Minuten</string>
+    <string name="quote_refresh">Jetzt neuen Spruch laden</string>
+    <string name="quote_demo">Übergang ansehen</string>
+    <string name="quote_demo_hint">Aktuellen Spruch noch einmal animieren</string>
+    <string name="quote_hint">Quelle: spruch-des-tages.de · erster zufälliger Spruch. Das Intervall gilt für alle Spruch-Widgets. Die Seite wird nur bei sichtbarem Widget auf Home geladen; gleiche Zufallstreffer bleiben unverändert. Pixel fallen nur bei Text; Bilder werden sanft überblendet. Einflug und Ausflug sind getrennt auf Widget oder Bildschirmrand sowie vor/hinter dem Dock einstellbar. Bei Ladefehlern bleibt der letzte Spruch. Schriftgröße passt sich bei langen Sprüchen dem Widget an; bei … das Widget höher einstellen.</string>
+    <string name="quote_background">Widget-Hintergrund anzeigen</string>
+    <string name="quote_material">Hintergrundstil</string>
+    <string name="quote_opacity">Hintergrund · Deckkraft in Prozent</string>
+    <string name="quote_enter_path">Pixel-Einflug · Start</string>
+    <string name="quote_enter_layer">Pixel-Einflug · Ebene</string>
+    <string name="quote_exit_path">Pixel-Ausflug · Ziel</string>
+    <string name="quote_exit_layer">Pixel-Ausflug · Ebene</string>
+</resources>

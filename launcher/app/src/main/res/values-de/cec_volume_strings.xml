@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cec_volume_enable">HDMI-CEC-Lautstärke anzeigen</string>
+    <string name="cec_volume_source">HDMI · Sonos Arc</string>
+    <string name="cec_volume_muted">Stumm · %1$d</string>
+    <string name="cec_volume_waiting">Warte auf CEC</string>
+    <string name="cec_volume_authorize">ADB am TV erlauben</string>
+</resources>

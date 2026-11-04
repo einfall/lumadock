@@ -1,0 +1,10 @@
+Official Apple Inc. root certificate
+Source (downloaded over independently verified HTTPS):
+https://www.apple.com/appleca/AppleIncRootCertificate.cer
+Linked by https://www.apple.com/certificateauthority/
+SHA-256: b0b1730ecbc7ff4505142c49f1295e6eda6bcaed7e2c68c5be91b5a11001f024
+Android resource: res/raw/apple_inc_root.cer
+Scope: only the exact sylvan.apple.com domain, for the requested aerial-video URLs.
+The certificate chain and hostname were verified using this root on 2026-10-29.
+No trust-all TLS managers, insecure hostname verifiers, system certificate installs,
+or HTTPS-to-HTTP fallbacks are used by the launcher.

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="design_title">Design &amp; apps</string>
+    <string name="design_columns">Apps per row</string>
+    <string name="design_rows">Visible rows below dock</string>
+    <string name="design_apps">Visible apps</string>
+    <string name="design_hint">Checked apps appear on Home. Hiding an app does not disable it.</string>
+    <string name="design_apply">Apply</string>
+    <string name="design_cancel">Cancel</string>
+<string name="design_dock_columns">Dock slots</string>
+<string name="design_grid_columns">Apps per grid row</string>
+</resources>
