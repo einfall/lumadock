@@ -719,7 +719,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(dockColumns, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
+        if (dockRow) grid.addItemDecoration(new DockDecoration(dockColumns, density, cinematic, cfg.alwaysShowNames||AppTitleStyle.below(this), cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
                 singleRow, singleRow || cfg.dockBandAll,DockStyle.load(this,cfg)));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
@@ -1148,7 +1148,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Keep the hero below the header when the library is enabled on a short screen,
             // even when the theme requests an extra visible row below the dock.
             int shelfClearance = cfg.appLibrary ? hero.getMeasuredHeight() + (int) (40 * density) : 0;
-            int want = Math.max(shelfClearance, DockPolicy.top(h,dockRow,itemH,singleRow?0:cfg.rowsBelowDock,density)-(cfg.alwaysShowNames?(int)(22*density):0));
+            int nameRoom=Math.max(cfg.alwaysShowNames?(int)(22*density):0,FocusedAppName.reservedRoom(this,AppAdapter.tileHeightPx(dockTileW)));
+            int want = Math.max(shelfClearance, DockPolicy.top(h,dockRow,itemH,singleRow?0:cfg.rowsBelowDock,density)-nameRoom);
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));
@@ -1197,7 +1198,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ((GridLayoutManager)grid.getLayoutManager()).setSpanCount(singleRow?1:dockRow?dockColumns*COLUMNS:COLUMNS);
         if(tileEffects!=null)tileEffects.dispose();
         while(grid.getItemDecorationCount()>0)grid.removeItemDecorationAt(0);
-        if(dockRow)grid.addItemDecoration(new DockDecoration(dockColumns,density,cinematic,cfg.alwaysShowNames,cfg.dockOpacity,cfg.dockGlass,cfg.dockEvenPadding,cfg.dockBand,singleRow,singleRow||cfg.dockBandAll,DockStyle.load(this,cfg)));
+        if(dockRow)grid.addItemDecoration(new DockDecoration(dockColumns,density,cinematic,cfg.alwaysShowNames||AppTitleStyle.below(this),cfg.dockOpacity,cfg.dockGlass,cfg.dockEvenPadding,cfg.dockBand,singleRow,singleRow||cfg.dockBandAll,DockStyle.load(this,cfg)));
         adapter=new AppAdapter(this,this,dockColumns,cfg);Order order=Order.load(Order.file(this));adapter.setSavedOrder(Order.ranks(order,cfg.dockApps),Order.docked(order,cfg.dockApps));grid.setAdapter(adapter);tileEffects=new TileEffectsDecoration(grid,adapter);grid.addItemDecoration(tileEffects);addDockBrowseDecoration();reloadTiles();
         layoutDesignGrid();grid.requestLayout();
         int pos=adapter.positionOf(key);lastFocused=Math.max(0,Math.min(pos>=0?pos:slot,adapter.appCount()-1));lastFocusedKey=adapter.keyAt(lastFocused);

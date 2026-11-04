@@ -3,6 +3,8 @@ import android.content.*;
 final class AppTitlePopup {
     static void show(MainActivity a,Runnable changed){
         AppTitleStyle style=a.appTitleStyle();if(style==null)return;SharedPreferences p=a.getSharedPreferences(Config.SETTINGS_NAME,0);SettingsSheet s=new SettingsSheet(a,a.getString(R.string.title_style));
+        s.options("text",a.getString(R.string.title_position),new String[]{a.getString(R.string.title_position_hero),a.getString(R.string.title_position_focus)},i->(i==1)==AppTitleStyle.below(a),i->{p.edit().putString(AppTitleStyle.MODE,i==1?"focused":"hero").apply();changed.run();});
+        s.info(a.getString(R.string.title_position_hint));
         GridSlider size=new GridSlider(a,a.getString(R.string.title_size),18,120,AppTitlePolicy.size(p.getInt(AppTitleStyle.SIZE,style.originalSize)),n->p.edit().putInt(AppTitleStyle.SIZE,n).apply());s.add(size);
         GridSlider labels=new GridSlider(a,a.getString(R.string.title_labels),60,160,AppTitlePolicy.labels(p.getInt(AppTitleStyle.LABELS,100)),n->{p.edit().putInt(AppTitleStyle.LABELS,n).apply();changed.run();});s.add(labels);
         final GridSlider[] coords=new GridSlider[2];Runnable sync=()->{int[] now=style.position("title");if(coords[0]!=null)coords[0].syncValue(now[0]);if(coords[1]!=null)coords[1].syncValue(now[1]);};

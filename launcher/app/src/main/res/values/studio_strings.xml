@@ -1,5 +1,9 @@
 <resources>
     <string name="title_style">App-Name · Größe &amp; Position</string>
+    <string name="title_position">App-Name anzeigen</string>
+    <string name="title_position_hero">Bisherige Position</string>
+    <string name="title_position_focus">Unter fokussierter App</string>
+    <string name="title_position_hint">Unter der App: nur der aktive Name, mittig unter Kachel und Fokusrahmen. Schrift und Kachel-Beschriftungsgröße gelten weiterhin. Freies Verschieben und großer Titel gelten für die bisherige Position.</string>
     <string name="title_style_hint">Großer Titel, Kachel-Beschriftung und freie Platzierung</string>
     <string name="title_size">Großer App-Name · Schriftgröße</string>
     <string name="title_labels">Kachel-Beschriftung · Prozent</string>
