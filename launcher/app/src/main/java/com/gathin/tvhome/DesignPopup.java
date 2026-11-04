@@ -21,6 +21,7 @@ final class DesignPopup {
         String[] sortIds={"custom","name","installed","frequent"};p.options("move",s(R.string.dock_sort),java.util.Arrays.stream(sortIds).map(this::sortName).toArray(String[]::new),i->sortIds[i].equals(DockPolicy.mode(prefs.getString("dock_sort","custom"))),i->changed(prefs.edit().putString("dock_sort",sortIds[i])));
         p.toggle(s(R.string.dock_only),s(R.string.dock_only_hint),cfg.singleRow,on->changed(prefs.edit().putBoolean("dock_only",on)));
         DockBrowsePopup.append(a,applied,p);
+        DockPlacementPopup.append(a,p,applied);
         p.toggle(s(R.string.dock_wrap),s(R.string.dock_wrap_hint),prefs.getBoolean("dock_wrap",false),on->changed(prefs.edit().putBoolean("dock_wrap",on)));
         p.toggle(s(R.string.dock_counter),s(R.string.dock_counter_hint),prefs.getBoolean("dock_counter",false),on->changed(prefs.edit().putBoolean("dock_counter",on)));DockStylePopup.append(a,()->{if(a instanceof MainActivity)((MainActivity)a).refreshDockStyle();},p);p.show();}
     private String sortName(String id){switch(DockPolicy.mode(id)){case "name":return s(R.string.dock_sort_name);case "installed":return s(R.string.dock_sort_installed);case "frequent":return s(R.string.dock_sort_frequent);default:return s(R.string.dock_sort_custom);}}

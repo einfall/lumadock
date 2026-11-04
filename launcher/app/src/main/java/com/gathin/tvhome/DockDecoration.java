@@ -24,6 +24,10 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private final RectF inner=new RectF();
     private final RectF painted=new RectF();
     private boolean paintValid;
+    private float pageRoom;
+    private boolean boundsValid;
+    DockDecoration withPageRoom(float room){pageRoom=Math.max(0,room);return this;}
+    boolean bounds(RectF out){out.set(rect);return boundsValid;}
     private final QuickAccessDock quickAccess=new QuickAccessDock();
     DockDecoration(int size,float density,boolean translucent,boolean names,int opacity,boolean lightGlass,boolean evenPadding,boolean visible,boolean singleRow,boolean bandAll,DockStyle style){this(size,density,translucent,names,opacity,lightGlass,evenPadding,visible,singleRow,bandAll);setStyle(style);}
     void setStyle(DockStyle style){custom=style;paintValid=false;if(style==null||!"quickaccess".equals(style.mode))quickAccess.clear();}
@@ -96,7 +100,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
 
     @Override
     public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-        if (!(custom==null?bandVisible:custom.visible)) return;
+        boundsValid=false;
         boolean any = false;
         int cardWidth = 0;
         for (int i = 0; i < parent.getChildCount(); i++) {
@@ -147,7 +151,9 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             rect.left = Math.max(rect.left, density);
             rect.right = Math.min(rect.right, parent.getWidth() - density);
         }
-        rect.bottom += namesRoom;
+        rect.bottom += namesRoom+pageRoom;
+        boundsValid=true;
+        if (!(custom==null?bandVisible:custom.visible)) return;
         if(custom!=null&&!"legacy".equals(custom.mode)){drawCustom(c);return;}
         if (lightGlass && (rect.top != shaderTop || rect.bottom != shaderBottom)) {
             // The pills' glass (pill_bg: white, 18% fading to 8%), a little fainter over this much larger area.

@@ -274,6 +274,14 @@ public class HomeKeyService extends AccessibilityService {
 
     @Override
     protected boolean onKeyEvent(KeyEvent event) {
+        // Fixed-volume HDMI sources may send CEC keys without VOLUME_CHANGED_ACTION.
+        // Observe only: keep the original key, native CEC handling and held-key repeats.
+        int key=event.getKeyCode();
+        if(event.getAction()==KeyEvent.ACTION_DOWN
+                &&(key==KeyEvent.KEYCODE_VOLUME_UP||key==KeyEvent.KEYCODE_VOLUME_DOWN||key==KeyEvent.KEYCODE_VOLUME_MUTE)
+                &&getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean(CecVolumeOverlay.KEY,false)) {
+            cecOverlay().trigger();
+        }
         // power_on_home: the first key after power-on hands the TV to the user (power and wake keys don't count).
         if (powerOnUntil != 0 && event.getAction() == KeyEvent.ACTION_DOWN
                 && event.getKeyCode() != KeyEvent.KEYCODE_POWER && event.getKeyCode() != KeyEvent.KEYCODE_WAKEUP) {

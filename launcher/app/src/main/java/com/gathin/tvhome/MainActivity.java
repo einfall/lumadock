@@ -110,6 +110,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private int dockColumns;
     private boolean dockBackHeld;
     private TextView dockCounter;
+    private DockPageDots dockPageDots;
     private ViewTreeObserver.OnPreDrawListener dockFocusLayout;
     private int dockFocusDescendants;
     private long dockUsageRevision;
@@ -720,7 +721,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         });
         if (dockRow) grid.addItemDecoration(new DockDecoration(dockColumns, density, cinematic, cfg.alwaysShowNames||AppTitleStyle.below(this), cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
-                singleRow, singleRow || cfg.dockBandAll,DockStyle.load(this,cfg)));
+                singleRow, singleRow || cfg.dockBandAll,DockStyle.load(this,cfg)).withPageRoom(DockPlacementPopup.pageRoom(this,singleRow)));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
         if (animations && !reducedMotion) {
@@ -738,6 +739,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
         // rows_below_dock grid rows under it; the rest of the grid stays below until you press Down.
         grid.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->layoutDesignGrid());
+        dockPageDots=new DockPageDots(this,root,grid,()->new int[]{
+                singleRow&&getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean(DockPlacementPopup.DOTS,false)?1:0,
+                adapter.appCount(),dockColumns,lastFocused});
 
         // Keep the glass glued to its tile while the grid scrolls.
         grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -1138,6 +1142,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void layoutDesignGrid(){
         Config cfg=liveDesignConfig;int rowsBelowDock=singleRow?0:DockPolicy.fullRows(cfg.rowsBelowDock);
+            android.content.SharedPreferences placement=getSharedPreferences(Config.SETTINGS_NAME,0);
+            boolean positioned=singleRow&&placement.getBoolean(DockPlacementPopup.ENABLED,false);
+            ((DockRecyclerView)grid).clipDockViewport(positioned);
+            FrameLayout.LayoutParams gridLp=(FrameLayout.LayoutParams)grid.getLayoutParams();
+            int available=((View)grid.getParent()).getWidth();
+            int desiredWidth=positioned?DockPlacementPolicy.width(available,placement.getInt(DockPlacementPopup.WIDTH,100)):ViewGroup.LayoutParams.MATCH_PARENT;
+            int desiredX=positioned?DockPlacementPolicy.offset(available,desiredWidth,placement.getInt(DockPlacementPopup.X,50)):0;
+            if(available>0&&(gridLp.width!=desiredWidth||gridLp.leftMargin!=desiredX)){
+                gridLp.width=desiredWidth;gridLp.leftMargin=desiredX;grid.setLayoutParams(gridLp);return;
+            }
             int h = grid.getHeight(); if(h<=0)return;
             // Item height follows the tile size, which follows the columns and the rows that must fit (AppAdapter.tileWidthPx).
             int inner = grid.getWidth() - grid.getPaddingLeft() - grid.getPaddingRight();
@@ -1149,7 +1163,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // even when the theme requests an extra visible row below the dock.
             int shelfClearance = cfg.appLibrary ? hero.getMeasuredHeight() + (int) (40 * density) : 0;
             int nameRoom=Math.max(cfg.alwaysShowNames?(int)(22*density):0,FocusedAppName.reservedRoom(this,AppAdapter.tileHeightPx(dockTileW)));
-            int want = Math.max(shelfClearance, DockPolicy.top(h,dockRow,itemH,singleRow?0:cfg.rowsBelowDock,density)-nameRoom);
+            int dotsRoom=DockPlacementPopup.pageRoom(this,singleRow);
+            int want = Math.max(shelfClearance, DockPolicy.top(h,dockRow,itemH,singleRow?0:cfg.rowsBelowDock,density)-nameRoom-dotsRoom);
+            if(positioned)want=DockPlacementPolicy.top(Math.max(shelfClearance,Math.round(22*density)),want,placement.getInt(DockPlacementPopup.Y,100));
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));
@@ -1198,7 +1214,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ((GridLayoutManager)grid.getLayoutManager()).setSpanCount(singleRow?1:dockRow?dockColumns*COLUMNS:COLUMNS);
         if(tileEffects!=null)tileEffects.dispose();
         while(grid.getItemDecorationCount()>0)grid.removeItemDecorationAt(0);
-        if(dockRow)grid.addItemDecoration(new DockDecoration(dockColumns,density,cinematic,cfg.alwaysShowNames||AppTitleStyle.below(this),cfg.dockOpacity,cfg.dockGlass,cfg.dockEvenPadding,cfg.dockBand,singleRow,singleRow||cfg.dockBandAll,DockStyle.load(this,cfg)));
+        if(dockRow)grid.addItemDecoration(new DockDecoration(dockColumns,density,cinematic,cfg.alwaysShowNames||AppTitleStyle.below(this),cfg.dockOpacity,cfg.dockGlass,cfg.dockEvenPadding,cfg.dockBand,singleRow,singleRow||cfg.dockBandAll,DockStyle.load(this,cfg)).withPageRoom(DockPlacementPopup.pageRoom(this,singleRow)));
         adapter=new AppAdapter(this,this,dockColumns,cfg);Order order=Order.load(Order.file(this));adapter.setSavedOrder(Order.ranks(order,cfg.dockApps),Order.docked(order,cfg.dockApps));grid.setAdapter(adapter);tileEffects=new TileEffectsDecoration(grid,adapter);grid.addItemDecoration(tileEffects);addDockBrowseDecoration();reloadTiles();
         layoutDesignGrid();grid.requestLayout();
         int pos=adapter.positionOf(key);lastFocused=Math.max(0,Math.min(pos>=0?pos:slot,adapter.appCount()-1));lastFocusedKey=adapter.keyAt(lastFocused);
@@ -1467,6 +1483,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onDestroy() {
+        if(dockPageDots!=null)dockPageDots.close();
         if(tileEffects!=null)tileEffects.dispose();
         super.onDestroy();
         weatherWidget.close();
@@ -1984,7 +2001,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         boolean counter=singleRow&&getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean("dock_counter",false);
         dockCounter.setVisibility(counter?View.VISIBLE:View.GONE);
-        if(counter){dockCounter.setText((position+1)+" / "+adapter.appCount());dockCounter.setTranslationY(Math.max(0,r.top-42*density));}
+        if(counter){dockCounter.setText((position+1)+" / "+adapter.appCount());dockCounter.setTranslationY(Math.max(0,r.top-42*density));
+            Rect dockViewport=new Rect(0,0,grid.getWidth(),grid.getHeight());root.offsetDescendantRectToMyCoords(grid,dockViewport);
+            FrameLayout.LayoutParams counterLp=(FrameLayout.LayoutParams)dockCounter.getLayoutParams();
+            dockCounter.setTranslationX(dockViewport.right-8*density-(root.getWidth()-counterLp.rightMargin));}
         View item = (View) card.getParent();
         if (dockRow && (singleRow || position < dockColumns)) {
             // Dock: park it at the bottom of the screen and show the top shelf for this app. In a single row

@@ -41,4 +41,18 @@ public class CecAudioStatusTest {
         assertEquals(0, parse(ACTIVE + report("00")).volume);
         assertEquals(100, parse(ACTIVE + report("64")).volume);
     }
+    @Test public void playbackReportsWithMillisecondsUseItsOwnAddress() {
+        String shield=ACTIVE+"  HdmiCecLocalDevice #4:\n    mAddress: 4\n";
+        String received=report("21").replace("20:40:15 ","20:40:15.125 ").replace("50:7A","54:7A");
+        CecAudioStatus result=parse(shield+received);
+        assertNotNull(result);assertEquals(33,result.volume);assertEquals(NOW+125,result.timestamp);
+        assertNull(parse(shield+report("21")));
+        assertNull(parse(shield+received.replace("[R]","[S]")));
+    }
+    @Test public void playbackUnknownAndVolumeKeyCommandsCannotInventAPercentage() {
+        String shield=ACTIVE+"mAddress: 4\n";
+        assertNull(parse(shield+report("7F").replace("50:7A","54:7A")));
+        assertNull(parse(shield+"[S] time=2026-10-28 20:40:15.125 message=<User Control Pressed> 45:44:41\n"));
+        assertNull(parse(shield+report("21").replace("50:7A","58:7A")));
+    }
 }
