@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.7 — 2026-11-05
+
+Remove the automatic system display and the duplicate three-cards/combined-card selector. There is now one widget system: add CPU, RAM, storage, network or Systemübersicht yourself, with independent visibility and removal for every instance. Existing independently added widgets remain unchanged. The old global switches and legacy card positions no longer create visible system cards, including after an update or restart. The shared sampler now reads only the metrics requested by enabled widget instances. Its refresh interval is available directly in the widget menu.
+
+Internal metric widgets can shrink to 64 × 32 dp. At smaller sizes the complete content scales proportionally inside the selected width and height; text, icons and bars are not cropped or stretched. Automatic height also follows smaller widths. The four system-information layouts keep their glass/light options and independent sizing. Quote and Android widgets retain their own size controls.
+
+478 JVM tests pass; Android lint has zero errors. Philips device checks cover absence of legacy cards/menu, adding a system widget, 160 × 96 and 64 × 32 dp sizes, persistence after reopening, hiding, removing and a tiny independent CPU widget. Test-created widgets are removed; existing independent widgets stay in place. No new permission or dependency.
+
 ## 1.0.6 — 2026-11-05
 
 The four system-information layouts now offer a transparent glass surface, softly lit outlines and readable light text with blue, violet, green and cyan accents. Switch between glass and the previous light appearance inline, with live preview and adjustable glass opacity from 0–90%. No blur, image capture or additional background work. The original widget layout keeps its material theme.

@@ -29,7 +29,7 @@ final class SystemInfoView extends View {
     private int ink(){return glass?0xFFF4F7FC:0xFF182131;}
     private int muted(){return glass?0xFFCDD7E5:0xFF46536A;}
     private int accent(int kind){return glass?lightAccents[kind]:accents[kind];}
-    @Override protected void onMeasure(int width,int height){setMeasuredDimension(MeasureSpec.getSize(width),resolveSize(Math.round(totalHeight()*density),height));}
+    @Override protected void onMeasure(int width,int height){setMeasuredDimension(MeasureSpec.getSize(width),resolveSize(Math.round(totalHeight()*density*Math.min(1f,MeasureSpec.getSize(width)/(240*density))),height));}
     private int percent(int kind){if(snapshot==null)return -1;return kind==0?snapshot.cpu:kind==1?SystemStatsPolicy.used(snapshot.ramAvailable,snapshot.ramTotal):kind==2?SystemStatsPolicy.used(snapshot.diskAvailable,snapshot.diskTotal):-1;}
     private String label(int kind){return kind==0?"CPU":kind==1?"RAM":kind==2?"HDD":"Netzwerk";}
     private String bytes(long value){return android.text.format.Formatter.formatShortFileSize(getContext(),Math.max(0,value));}
@@ -44,7 +44,7 @@ final class SystemInfoView extends View {
     private void icon(Canvas canvas,int kind,float x,float y,boolean badge){if(badge)box(canvas,x-5,y-5,x+20,y+20,7,glass?(0x44000000|(accents[kind]&0xFFFFFF)):accents[kind]);Drawable glyph=icons[kind];glyph.setTint(badge?Color.WHITE:accent(kind));int save=canvas.save();canvas.translate(x,y);glyph.setBounds(0,0,15,15);glyph.draw(canvas);canvas.restoreToCount(save);}
     private void progress(Canvas canvas,float l,float y,float width,int value,int color){box(canvas,l,y,l+width,y+2.5f,1.25f,glass?0x36FFFFFF:0xFFD9E0EB);if(value>=0)box(canvas,l,y,l+width*Math.min(100,value)/100f,y+2.5f,1.25f,color);}
     @Override protected void onDraw(Canvas raw){
-        super.onDraw(raw);int saved=raw.save();raw.scale(density,density);float width=getWidth()/density,height=getHeight()/density;
+        super.onDraw(raw);int saved=raw.save();float w=getWidth()/density,h=getHeight()/density;float fit=Math.min(1f,Math.min(w/240f,h/SystemWidgetPolicy.readable("system",style,mask)));fit=Math.max(.01f,fit);raw.scale(density*fit,density*fit);float width=w/fit,height=h/fit;
         if("resources".equals(style)){
             if(glass)pane(raw,0,0,width,height,17,0);else{paint.setStyle(Paint.Style.FILL);paint.setColor(Color.WHITE);paint.setShader(new LinearGradient(0,0,width,height,new int[]{0xFFE7F0FF,0xFFF2EAF8,0xFFDFF1F3},null,Shader.TileMode.CLAMP));rect.set(0,0,width,height);raw.drawRoundRect(rect,17,17,paint);paint.setShader(null);}
             words(raw,title,14,24,13,ink(),true,width-28);

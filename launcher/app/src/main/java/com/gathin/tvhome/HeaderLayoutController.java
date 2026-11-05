@@ -29,7 +29,7 @@ final class HeaderLayoutController implements PlacementTarget {
     public int[] size(String key){View v=view(key);return new int[]{dp(v.getWidth()),dp(v.getHeight())};}
     public int[] position(String key){Rect b=bounds(key);return new int[]{dp(b.left),dp(b.top)};}
     public Rect bounds(String key){View v=view(key);int[] loc=new int[2],origin=new int[2];v.getLocationOnScreen(loc);root.getLocationOnScreen(origin);float sx=v.getScaleX(),sy=v.getScaleY();return new Rect(Math.round(loc[0]-origin[0]+v.getWidth()*(sx-1)/2),Math.round(loc[1]-origin[1]+v.getHeight()*(sy-1)/2),Math.round(loc[0]-origin[0]+v.getWidth()*(sx+1)/2),Math.round(loc[1]-origin[1]+v.getHeight()*(sy+1)/2));}
-    boolean shown(String key){int i=index(key);if(i<4)return prefs.getBoolean(P+"show_"+key,i!=0||greetingDefault);return prefs.getBoolean(SystemStatsWidget.ENABLED,statsDefault)&&prefs.getBoolean(metricKey(i),true);}
+    boolean shown(String key){int i=index(key);if(i<4)return prefs.getBoolean(P+"show_"+key,i!=0||greetingDefault);return false;}
     private static String metricKey(int i){return i==4?SystemStatsWidget.CPU:i==5?SystemStatsWidget.RAM:SystemStatsWidget.STORAGE;}
     void show(String key,boolean on){int i=index(key);SharedPreferences.Editor edit=prefs.edit();if(i<4)edit.putBoolean(P+"show_"+key,on);else{if(on&&!prefs.getBoolean(SystemStatsWidget.ENABLED,statsDefault))edit.putBoolean(SystemStatsWidget.CPU,false).putBoolean(SystemStatsWidget.RAM,false).putBoolean(SystemStatsWidget.STORAGE,false);if(on)edit.putBoolean(SystemStatsWidget.ENABLED,true);edit.putBoolean(metricKey(i),on);}edit.apply();}
     public void set(String key,int x,int y){prefs.edit().putInt(P+key+"_x",x).putInt(P+key+"_y",y).apply();apply();}

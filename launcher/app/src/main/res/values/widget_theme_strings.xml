@@ -21,8 +21,8 @@
 <string name="widgets_add">Widget aus eigener Quelle hinzufügen</string>
 <string name="widgets_sources">Eigene Widget-Quelle auswählen</string>
 <string name="widgets_sources_hint">CPU, RAM, Speicher, Systemübersicht oder Spruch des Tages</string>
-<string name="widgets_source_note">Eine Quelle lässt sich mehrfach verwenden. Alle Instanzen nutzen dieselbe Messung. Bis zu zwölf zusätzliche Widgets, unabhängig von der bisherigen Systemanzeige.</string>
-<string name="widgets_hint">Jedes zusätzliche Widget besitzt eigene Sichtbarkeit, Theme, Größe und Position. Der Hauptschalter unter Systemanzeige steuert die bisherigen Karten bzw. ihre gemeinsame Übersicht. Zusätzliche Instanzen sind unabhängig davon.</string>
+<string name="widgets_source_note">Eine Quelle lässt sich mehrfach verwenden. Alle Instanzen nutzen dieselbe Messung. Bis zu zwölf Widgets.</string>
+<string name="widgets_hint">Jedes Widget lässt sich einzeln hinzufügen, ausblenden, entfernen, gestalten und positionieren. Ohne hinzugefügte Widgets bleibt die Systemanzeige leer.</string>
 <string name="widgets_limit">Maximal zwölf zusätzliche Widgets. Entferne zuerst eine Instanz.</string>
 <string name="widgets_theme">Theme dieses Widgets</string>
 <string name="widgets_width">Widget-Breite (dp)</string>
