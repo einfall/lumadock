@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.6 — 2026-11-05
+
+The four system-information layouts now offer a transparent glass surface, softly lit outlines and readable light text with blue, violet, green and cyan accents. Switch between glass and the previous light appearance inline, with live preview and adjustable glass opacity from 0–90%. No blur, image capture or additional background work. The original widget layout keeps its material theme.
+
+Set widget width and height independently. Internal system, CPU, RAM, storage and network widget instances now support a persistent custom height, alongside existing quote and Android-widget size controls. System rows distribute the available height without stretching text or icons. Readable minimums follow the selected layout and metric count; the screen limits oversized values. Widget-Höhe automatisch restores natural sizing without changing width, placement or data settings. The combined system overview stores its own dimensions, material and opacity. Existing sizes remain automatic until edited. Coordinate limits follow the new widget dimensions.
+
+477 JVM tests pass; Android lint has zero errors. Philips device screenshots verify all four glass layouts, the light alternative, opacity changes, independent width/height changes, saved dimensions after reopening and automatic height restoration. No new dependency or permission.
+
 ## 1.0.5 — 2026-11-04
 
 Move the caption beneath the focused app with the same fullscreen D-pad placement control as widgets: Design & Apps → Schriften & Icons → App-Name · Größe & Position → App-Name frei verschieben. Arrows preview the position, OK saves a relative offset that follows the focused tile, and Back cancels. A separate reset restores the default caption position without changing the large app-name layout.

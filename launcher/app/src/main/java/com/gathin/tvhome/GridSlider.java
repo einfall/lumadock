@@ -14,7 +14,7 @@ final class GridSlider extends LinearLayout {
 
     interface Changed {void value(int n);}
 
-    private final int min;private int max;private java.util.function.IntSupplier maxSource;private int value;private final TextView title,number;private final SeekBar bar;private final Changed changed;
+    private int min,max;private java.util.function.IntSupplier minSource,maxSource;private int value;private final TextView title,number;private final SeekBar bar;private final Changed changed;
 
     GridSlider(Activity a,String label,int min,int max,int initial,Changed changed){
 
@@ -29,7 +29,8 @@ final class GridSlider extends LinearLayout {
     }
 
     GridSlider maxFrom(java.util.function.IntSupplier source){maxSource=source;refreshMax();return this;}
-    private void refreshMax(){if(maxSource!=null){int next=Math.max(min,maxSource.getAsInt());if(next!=max){max=next;bar.setMax(max-min);syncValue(value);}}}
+    GridSlider minFrom(java.util.function.IntSupplier source){minSource=source;refreshMax();return this;}
+    private void refreshMax(){int nextMin=minSource==null?min:minSource.getAsInt();int nextMax=Math.max(nextMin,maxSource==null?max:maxSource.getAsInt());if(nextMin!=min||nextMax!=max){min=nextMin;max=nextMax;bar.setMax(max-min);syncValue(value);}}
     void syncValue(int n){value=Math.max(min,Math.min(max,n));bar.setProgress(value-min);number.setText(Integer.toString(value));setContentDescription(title.getText()+" · "+value);}
     private void update(int n){refreshMax();n=Math.max(min,Math.min(max,n));if(n==value)return;syncValue(n);changed.value(value);}
 
