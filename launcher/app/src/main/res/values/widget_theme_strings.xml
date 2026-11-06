@@ -11,7 +11,7 @@
 <string-array name="surface_theme_names"><item>Original · bisherige Optik</item><item>Glas · bisherige Buttons</item><item>Dunkle Karte · bisherige Widgets</item><item>Eisglas</item><item>Graphit</item><item>Nur Kontur</item><item>Hell</item><item>Aurora</item></string-array>
 <string name="widgets_title">Widgets verwalten</string>
 <string name="widgets_menu_hint">Quellen, mehrere Instanzen, Systemübersicht und Positionen</string>
-<string name="widgets_summary">Systemübersicht</string>
+<string name="widgets_summary">Systeminformationen</string>
 <string name="widgets_layout">Darstellung der Systemanzeige</string>
 <string name="widgets_combined">Ein gemeinsames System-Widget</string>
 <string name="widgets_separate">Drei einzelne Widgets · bisherige Ansicht</string>
@@ -20,10 +20,10 @@
 <string name="widgets_instances">Eigene Widget-Instanzen</string>
 <string name="widgets_add">Widget aus eigener Quelle hinzufügen</string>
 <string name="widgets_sources">Eigene Widget-Quelle auswählen</string>
-<string name="widgets_sources_hint">CPU, RAM, Speicher, Systemübersicht oder Spruch des Tages</string>
+<string name="widgets_sources_hint">Systeminformationen mit Messwert- und Theme-Auswahl oder Spruch des Tages</string>
 <string name="widgets_source_note">Eine Quelle lässt sich mehrfach verwenden. Alle Instanzen nutzen dieselbe Messung. Bis zu zwölf Widgets.</string>
 <string name="widgets_hint">Jedes Widget lässt sich einzeln hinzufügen, ausblenden, entfernen, gestalten und positionieren. Ohne hinzugefügte Widgets bleibt die Systemanzeige leer.</string>
-<string name="widgets_limit">Maximal zwölf zusätzliche Widgets. Entferne zuerst eine Instanz.</string>
+<string name="widgets_limit">Maximal zwölf Widgets. Entferne zuerst eine Instanz.</string>
 <string name="widgets_theme">Theme dieses Widgets</string>
 <string name="widgets_width">Widget-Breite (dp)</string>
 <string name="widgets_height">Widget-Höhe (dp)</string>

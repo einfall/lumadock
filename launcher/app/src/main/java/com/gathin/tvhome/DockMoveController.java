@@ -38,7 +38,7 @@ final class DockMoveController implements PlacementTarget {
     }
     private void apply(){
         if(closed)return;boolean active=enabled();wrapper.setClipChildren(active?false:wrapperClip);
-        ((DockRecyclerView)grid).clipDockViewport(singleRow.getAsBoolean()&&(active||prefs.getBoolean(DockPlacementPopup.ENABLED,false)));
+        ((DockRecyclerView)grid).clipDockViewport(singleRow.getAsBoolean());
         if(!active){offset(baseLeft-grid.getLeft(),baseTop-grid.getTop());return;}
         if(!band())return;Rect current=bounds("dock");int[] size=size("dock");
         int x=HeaderLayoutPolicy.clamp(preview?previewX:prefs.getInt(PX,dp(current.left)),width(),size[0]);

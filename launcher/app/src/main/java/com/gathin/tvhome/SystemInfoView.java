@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import android.view.View;
 import java.util.*;
 
-/** Four lightweight, locally drawn resource layouts. No blur, bitmap polling or network request. */
+/** Local resource cards and circular gauges. No blur, bitmap polling or network request. */
 final class SystemInfoView extends View {
     private final float density,fontScale;
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -17,11 +17,14 @@ final class SystemInfoView extends View {
     private final int[] accents={0xFF2563EB,0xFF7C3AED,0xFF00816B,0xFF087EAD};
     private final int[] tints={0xFFE3EEFF,0xFFF0E5FF,0xFFDFF3EB,0xFFE1F3FA};
     private final RectF rect=new RectF();private String style="filled",title="Systemressourcen";private int mask=7;
-    private boolean glass=true;private int opacity=45;private final int[] lightAccents={0xFF91BEFF,0xFFC2A4FF,0xFF6DE0BE,0xFF7AD5FA};
+    private boolean customTitle;private boolean glass=true;private int opacity=45;private final int[] lightAccents={0xFF91BEFF,0xFFC2A4FF,0xFF6DE0BE,0xFF7AD5FA};
+    private String ringAxis="vertical";private int ringGap=10;
+    private final int[] ringColors={0xFF4C9BFF,0xFFD12EEA,0xFFFFA12C,0xFF43D0DC};
+    private final int[] ringLights={0xFF9CDFFF,0xFFF17BFF,0xFFFFDE6B,0xFFB7F7FF};
     private SystemStatsWidget.Snapshot snapshot;
     SystemInfoView(Context context){super(context);density=getResources().getDisplayMetrics().density;fontScale=getResources().getDisplayMetrics().scaledDensity/density;
         regular=Typeface.create(context.getString(R.string.font_regular),Typeface.NORMAL);bold=Typeface.create(regular,Typeface.BOLD);setFocusable(false);}
-    void style(String value,int mask,String title,boolean glass,int opacity){this.glass=glass;this.opacity=SystemWidgetPolicy.opacity(opacity);String selected=SystemInfoStyle.id(value);boolean layout=!style.equals(selected)||this.mask!=mask;this.style=selected;this.mask=mask;this.title=title;if(layout)requestLayout();invalidate();}
+    void style(String value,int mask,String title,boolean glass,int opacity,String ringAxis,int ringGap,boolean customTitle){this.customTitle=customTitle;boolean ringLayout=!this.ringAxis.equals(ringAxis)||this.ringGap!=ringGap;this.ringAxis=SystemRingPolicy.axis(ringAxis);this.ringGap=SystemRingPolicy.gap(ringGap);if(ringLayout)requestLayout();this.glass=glass;this.opacity=SystemWidgetPolicy.opacity(opacity);String selected=SystemInfoStyle.id(value);boolean layout=!style.equals(selected)||this.mask!=mask;this.style=selected;this.mask=mask;this.title=title;if(layout)requestLayout();invalidate();}
     void data(SystemStatsWidget.Snapshot data){snapshot=data;StringBuilder description=new StringBuilder(title);for(int bit:new int[]{1,2,4,8})if((mask&bit)!=0){int kind=Integer.numberOfTrailingZeros(bit);description.append(" · ").append(label(kind)).append(' ').append(reading(kind)).append(' ').append(detail(kind));}setContentDescription(description);invalidate();}
     private int count(){return Math.max(1,Integer.bitCount(mask&15));}
     private float rowHeight(){return "resources".equals(style)?56:"pastel".equals(style)?59:"compact".equals(style)?52:50;}
@@ -29,7 +32,7 @@ final class SystemInfoView extends View {
     private int ink(){return glass?0xFFF4F7FC:0xFF182131;}
     private int muted(){return glass?0xFFCDD7E5:0xFF46536A;}
     private int accent(int kind){return glass?lightAccents[kind]:accents[kind];}
-    @Override protected void onMeasure(int width,int height){setMeasuredDimension(MeasureSpec.getSize(width),resolveSize(Math.round(totalHeight()*density*Math.min(1f,MeasureSpec.getSize(width)/(240*density))),height));}
+    @Override protected void onMeasure(int width,int height){int w=MeasureSpec.getSize(width);int h=SystemInfoStyle.ring(style)?Math.round(SystemRingPolicy.naturalHeight(Math.round(w/density),mask,ringAxis,ringGap)*density):Math.round(totalHeight()*density*Math.min(1f,w/(240*density)));setMeasuredDimension(w,resolveSize(h,height));}
     private int percent(int kind){if(snapshot==null)return -1;return kind==0?snapshot.cpu:kind==1?SystemStatsPolicy.used(snapshot.ramAvailable,snapshot.ramTotal):kind==2?SystemStatsPolicy.used(snapshot.diskAvailable,snapshot.diskTotal):-1;}
     private String label(int kind){return kind==0?"CPU":kind==1?"RAM":kind==2?"HDD":"Netzwerk";}
     private String bytes(long value){return android.text.format.Formatter.formatShortFileSize(getContext(),Math.max(0,value));}
@@ -43,8 +46,25 @@ final class SystemInfoView extends View {
     private void right(Canvas canvas,String value,float right,float y,float size,int color,float max){text.setTypeface(regular);text.setTextSize(size*fontScale);float length=text.measureText(value);words(canvas,value,right-Math.min(length,max),y,size,color,false,max);}
     private void icon(Canvas canvas,int kind,float x,float y,boolean badge){if(badge)box(canvas,x-5,y-5,x+20,y+20,7,glass?(0x44000000|(accents[kind]&0xFFFFFF)):accents[kind]);Drawable glyph=icons[kind];glyph.setTint(badge?Color.WHITE:accent(kind));int save=canvas.save();canvas.translate(x,y);glyph.setBounds(0,0,15,15);glyph.draw(canvas);canvas.restoreToCount(save);}
     private void progress(Canvas canvas,float l,float y,float width,int value,int color){box(canvas,l,y,l+width,y+2.5f,1.25f,glass?0x36FFFFFF:0xFFD9E0EB);if(value>=0)box(canvas,l,y,l+width*Math.min(100,value)/100f,y+2.5f,1.25f,color);}
+    private void center(Canvas c,String value,float x,float baseline,float size,int color,boolean strong,float max){text.setTypeface(strong?bold:regular);text.setTextSize(size*fontScale);float length=text.measureText(value);words(c,value,x-Math.min(length,max)/2,baseline,size,color,strong,max);}
+    private void ringStroke(Canvas c,float x,float y,float radius,float stroke,int color,float sweep,boolean round){paint.setShader(null);paint.setStyle(Paint.Style.STROKE);paint.setStrokeCap(round?Paint.Cap.ROUND:Paint.Cap.BUTT);paint.setStrokeWidth(stroke);paint.setColor(color);rect.set(x-radius,y-radius,x+radius,y+radius);c.drawArc(rect,-90,sweep,false,paint);}
+    private void drawRings(Canvas raw){
+        int saved=raw.save();raw.scale(density,density);float[][] cells=SystemRingPolicy.cells(getWidth()/density,getHeight()/density,mask,ringAxis,ringGap);int index=0;boolean neon="ring_neon".equals(style);
+        for(int kind=0;kind<4;kind++)if((mask&(1<<kind))!=0){float[] cell=cells[index++];float x=cell[0],y=cell[1],side=cell[2],radius=side*(neon?.405f:.385f),stroke=side*(neon?.065f:.13f);int color=ringColors[kind],value=percent(kind),labelColor=glass?0xFFF2F5FA:0xFF192236;
+            paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setColor(glass?Color.argb(Math.round(opacity*2.55f),10,14,22):0xFFF4F6FA);raw.drawCircle(x,y,side*.47f,paint);
+            ringStroke(raw,x,y,radius,neon?side*.014f:stroke,glass?(0x30000000|(color&0xFFFFFF)):0xFFD9DDE6,360,false);
+            if(value>=0&&kind!=3){float sweep=SystemRingPolicy.sweep(value);if(neon){ringStroke(raw,x,y,radius,stroke*2.6f,0x13000000|(color&0xFFFFFF),sweep,true);ringStroke(raw,x,y,radius,stroke*1.65f,0x2A000000|(color&0xFFFFFF),sweep,true);}
+                paint.setStyle(Paint.Style.STROKE);paint.setStrokeCap(neon?Paint.Cap.ROUND:Paint.Cap.BUTT);paint.setStrokeWidth(stroke);paint.setColor(Color.WHITE);paint.setShader(new SweepGradient(x,y,new int[]{color,ringLights[kind],color},null));rect.set(x-radius,y-radius,x+radius,y+radius);raw.drawArc(rect,-90,sweep,false,paint);paint.setShader(null);
+            }
+            String name=cells.length==1&&customTitle?title:label(kind);float max=side*.65f;
+            if(kind==3){center(raw,"NETZ",x,y-side*.16f,side*.10f,labelColor,true,max);center(raw,"↓ "+(snapshot==null?"—":NetworkTrafficPolicy.format(snapshot.rx).replace(" MB/s","")),x,y+side*.01f,side*.115f,color,true,max);center(raw,"↑ "+(snapshot==null?"—":NetworkTrafficPolicy.format(snapshot.tx).replace(" MB/s","")),x,y+side*.16f,side*.115f,color,true,max);center(raw,"MB/s",x,y+side*.29f,side*.075f,labelColor,false,max);}
+            else if(neon){center(raw,name,x,y-side*.15f,side*.105f,labelColor,true,max);center(raw,value<0?"—":Integer.toString(value),x,y+side*.115f,side*.24f,color,true,max);center(raw,"%",x,y+side*.285f,side*.085f,labelColor,false,max);}
+            else{center(raw,name,x,y-side*.045f,side*.10f,color,true,max);center(raw,value<0?"—":value+"%",x,y+side*.14f,side*.17f,color,true,max);}
+        }
+        paint.setShader(null);paint.setStyle(Paint.Style.FILL);paint.setStrokeCap(Paint.Cap.BUTT);raw.restoreToCount(saved);
+    }
     @Override protected void onDraw(Canvas raw){
-        super.onDraw(raw);int saved=raw.save();float w=getWidth()/density,h=getHeight()/density;float fit=Math.min(1f,Math.min(w/240f,h/SystemWidgetPolicy.readable("system",style,mask)));fit=Math.max(.01f,fit);raw.scale(density*fit,density*fit);float width=w/fit,height=h/fit;
+        super.onDraw(raw);if(SystemInfoStyle.ring(style)){drawRings(raw);return;}int saved=raw.save();float w=getWidth()/density,h=getHeight()/density;float fit=Math.min(1f,Math.min(w/240f,h/SystemWidgetPolicy.readable("system",style,mask)));fit=Math.max(.01f,fit);raw.scale(density*fit,density*fit);float width=w/fit,height=h/fit;
         if("resources".equals(style)){
             if(glass)pane(raw,0,0,width,height,17,0);else{paint.setStyle(Paint.Style.FILL);paint.setColor(Color.WHITE);paint.setShader(new LinearGradient(0,0,width,height,new int[]{0xFFE7F0FF,0xFFF2EAF8,0xFFDFF1F3},null,Shader.TileMode.CLAMP));rect.set(0,0,width,height);raw.drawRoundRect(rect,17,17,paint);paint.setShader(null);}
             words(raw,title,14,24,13,ink(),true,width-28);

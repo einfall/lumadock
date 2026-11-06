@@ -5,6 +5,7 @@ final class AppTitlePopup {
         AppTitleStyle style=a.appTitleStyle();if(style==null)return;SharedPreferences p=a.getSharedPreferences(Config.SETTINGS_NAME,0);SettingsSheet s=new SettingsSheet(a,a.getString(R.string.title_style));
         s.options("text",a.getString(R.string.title_position),new String[]{a.getString(R.string.title_position_hero),a.getString(R.string.title_position_focus)},i->(i==1)==AppTitleStyle.below(a),i->{p.edit().putString(AppTitleStyle.MODE,i==1?"focused":"hero").apply();changed.run();});
         s.info(a.getString(R.string.title_position_hint));
+        s.toggle("App-Name · Dominante Icon-Farbe","Übernimmt die Farbe des ausgewählten App-Icons",p.getBoolean(AppTitleStyle.DOMINANT,false),on->p.edit().putBoolean(AppTitleStyle.DOMINANT,on).apply());
         GridSlider size=new GridSlider(a,a.getString(R.string.title_size),18,120,AppTitlePolicy.size(p.getInt(AppTitleStyle.SIZE,style.originalSize)),n->p.edit().putInt(AppTitleStyle.SIZE,n).apply());s.add(size);
         GridSlider labels=new GridSlider(a,a.getString(R.string.title_labels),60,160,AppTitlePolicy.labels(p.getInt(AppTitleStyle.LABELS,100)),n->{p.edit().putInt(AppTitleStyle.LABELS,n).apply();changed.run();});s.add(labels);
         java.util.function.Supplier<PlacementTarget> target=()->AppTitleStyle.below(a)?style.focused():style;

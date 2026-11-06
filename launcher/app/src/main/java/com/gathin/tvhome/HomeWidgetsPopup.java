@@ -15,19 +15,23 @@ final class HomeWidgetsPopup {
         p.clearRows();
         p.group(s(R.string.widgets_instances));p.row("grid",s(R.string.widgets_add),s(R.string.widgets_sources_hint),this::sources);
         p.row("grid",s(R.string.widgets_android),a.getString(R.string.widgets_provider_count,widgets.android.providers().size()),widgets.android::choose);
-        int n=0;for(HomeWidgetStore.Spec spec:widgets.store.all()){String id=spec.id;p.row(spec.android()?"grid":WidgetSource.find(spec.source).glyph,title(spec)+" · "+(++n),s(spec.enabled?R.string.menu_on:R.string.menu_off)+" · "+HomeWidgets.sourceName(a,spec.source),()->item(id));}
+        int n=0;for(HomeWidgetStore.Spec spec:widgets.store.all()){String id=spec.id;p.row(spec.android()?"grid":WidgetSource.find(spec.source).glyph,title(spec)+" · "+(++n),s(spec.enabled?R.string.menu_on:R.string.menu_off)+" · "+("system".equals(spec.source)?HomeWidgets.metricNames(a,spec.metricsMask):HomeWidgets.sourceName(a,spec.source)),()->item(id));}
         p.group(s(R.string.system_stats_refresh));p.add(new GridSlider(a,s(R.string.system_stats_interval),5,60,SystemStatsPolicy.seconds(prefs.getInt(SystemStatsWidget.SECONDS,10)),seconds->prefs.edit().putInt(SystemStatsWidget.SECONDS,seconds).apply()));
         p.info(s(R.string.widgets_hint));
     };render.run();SharedPreferences.OnSharedPreferenceChangeListener update=(sp,key)->{if(HomeWidgetStore.ITEMS.equals(key))p.body.post(render);};prefs.registerOnSharedPreferenceChangeListener(update);p.dialog.setOnDismissListener(d->prefs.unregisterOnSharedPreferenceChangeListener(update));p.show();}
-    private void sources(){SettingsSheet p=new SettingsSheet(a,s(R.string.widgets_sources));for(WidgetSource source:WidgetSource.values())p.row(source.glyph,HomeWidgets.sourceName(a,source.id),null,()->{HomeWidgetStore.Spec added=widgets.store.add(source.id);if(added==null){Toast.makeText(a,R.string.widgets_limit,Toast.LENGTH_LONG).show();return;}p.dialog.dismiss();item(added.id);});p.info(s(R.string.widgets_source_note));p.show();}
+    private void sources(){SettingsSheet p=new SettingsSheet(a,s(R.string.widgets_sources));for(WidgetSource source:new WidgetSource[]{WidgetSource.SYSTEM,WidgetSource.QUOTE})p.row(source.glyph,HomeWidgets.sourceName(a,source.id),null,()->{HomeWidgetStore.Spec added=widgets.store.add(source.id);if(added==null){Toast.makeText(a,R.string.widgets_limit,Toast.LENGTH_LONG).show();return;}p.dialog.dismiss();item(added.id);});p.info(s(R.string.widgets_source_note));p.show();}
     private void item(String id){HomeWidgetStore.Spec spec=widgets.spec(id);if(spec==null||widgets.view(id)==null)return;SettingsSheet p=new SettingsSheet(a,title(spec));final GridSlider[] heightControl=new GridSlider[1];
         if(spec.quote())quoteOptions(p,id);
         if("system".equals(spec.source)){
-            p.options("cpu","Systeminformationen · Layout",SystemInfoStyle.NAMES,i->SystemInfoStyle.IDS[i].equals(widgets.spec(id).metricsStyle),i->widgets.metricsStyle(id,SystemInfoStyle.IDS[i]));
-            p.options("photo","Systeminformationen · Oberfläche",new String[]{"Glas · Transparent","Hell · Bisheriger Stil"},i->(i==0)==widgets.spec(id).metricsGlass,i->widgets.metricsGlass(id,i==0));
+            p.options("cpu","Messwerte",new String[]{"CPU","RAM","Speicher","Netzwerk"},i->(widgets.spec(id).metricsMask&(1<<i))!=0,i->widgets.metrics(id,widgets.spec(id).metricsMask^(1<<i)),true);
+            boolean group="system".equals(spec.source);String[] ids=group?SystemInfoStyle.IDS:new String[]{"original","ring_neon","ring_donut"};String[] names=group?SystemInfoStyle.NAMES:new String[]{"Bisherige Ansicht","Ring · Leuchtend","Ring · Donut"};
+            p.options("cpu",group?"Systeminformationen · Layout":"Widget · Darstellung",names,i->ids[i].equals(widgets.spec(id).metricsStyle),i->widgets.metricsStyle(id,ids[i]));
+            if(group){p.options("grid","Ringe · Anordnung",new String[]{"Untereinander","Nebeneinander"},i->(i==1)=="horizontal".equals(widgets.spec(id).ringAxis),i->widgets.ringAxis(id,i==1?"horizontal":"vertical"));p.add(new GridSlider(a,"Ringe · Abstand (dp)",0,32,spec.ringGap,n->widgets.ringGap(id,n)));}
+            p.info("Ringe zeigen CPU-, RAM- und Speicherbelegung in Prozent. Einzelne Ring-Widgets lassen sich frei untereinander positionieren.");
+            p.options("photo",group?"Systeminformationen · Oberfläche":"Widget · Oberfläche",new String[]{"Glas · Transparent","Hell · Bisheriger Stil"},i->(i==0)==widgets.spec(id).metricsGlass,i->widgets.metricsGlass(id,i==0));
             p.add(new GridSlider(a,"Glas · Deckkraft (%)",0,90,spec.metricsOpacity,n->widgets.metricsOpacity(id,n)));
-            p.toggle("Netzwerk · Download und Upload","LAN + WLAN zusammen · MB/s (Megabyte pro Sekunde)",spec.network,on->widgets.network(id,on));
-            p.info("Netzwerkraten sind Mittelwerte über das Aktualisierungsintervall. Tunnel und Loopback werden nicht doppelt gezählt.");
+            p.info("Alle Messwerte gehören zu diesem Widget. Ohne ausgewählte Werte ist es ausgeblendet. Netzwerk zeigt LAN + WLAN zusammen in MB/s.");
+            if(group)p.info("Netzwerkraten sind Mittelwerte über das Aktualisierungsintervall. Tunnel und Loopback werden nicht doppelt gezählt.");
         }
         LinearLayout shown=p.toggle(s(R.string.header_show),null,spec.enabled,on->widgets.show(id,on));
         p.row("move",s(R.string.header_move),s(R.string.header_move_hint),()->HeaderMoveOverlay.show(a,widgets,id,title(spec),()->{}));

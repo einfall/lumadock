@@ -1932,7 +1932,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if(adapter==null||grid.getAdapter()!=adapter||position<0||position>=adapter.appCount())return;
         if(tileEffects!=null)tileEffects.focusChanged(position);
         lastFocused = position;
-        lastFocusedKey = adapter.keyAt(position);if(contentPreview!=null)contentPreview.focused(adapter.packageAt(position));
+        lastFocusedKey = adapter.keyAt(position);if(appTitleStyle!=null)appTitleStyle.focused(adapter,position);if(contentPreview!=null)contentPreview.focused(adapter.packageAt(position));
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
         // would be sized to 2*pad. Run again once the tile is laid out.
         if (card.getWidth() == 0) {

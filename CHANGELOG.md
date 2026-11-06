@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.8 — 2026-11-06
+
+Keep the Dock Only band at the configured viewport width, including the final page and the last pivot positions. Empty trailing slots no longer shrink the band. Clip both app tiles and item-decoration effects horizontally to the dock viewport, so glass, outlines and shine from adjacent off-screen icons do not leak outside the dock. Vertical focus zoom remains available. Page dots keep the same band center.
+
+Use one Systeminformationen widget source with selectable CPU, RAM, storage and network metrics and all appearance themes inside the same widget. Legacy individual metric instances are read as system-information instances with their original selected data, IDs, positions, dimensions and themes. Nothing is automatically removed or added. An empty metric selection hides the widget and requests no measurements.
+
+Add two circular themes: leuchtender Ring with rounded progress and layered glow, and Donut with a thicker flat-ended arc. CPU is blue, RAM magenta, storage orange. Rings can be stacked vertically or laid out horizontally, with a saved 0–32 dp gap. Circles preserve their aspect ratio within the chosen size. Network rings show actual download/upload MB/s, without an invented percentage. Rendering uses native strokes, without blur or continuous animation.
+
+Optionally color the selected app name with the icon’s dominant color. The switch under Schriften & Icons → App-Name · Größe & Position applies to both the large title and the caption below the focused app. It is off by default; font, size and placement remain independent.
+
+490 JVM tests pass and Android lint has zero errors. TV screenshots verify dock width/edge clipping, system-widget metric selection and migration, ring themes, and the optional app-title color. Existing user widget instances and personal layout settings are preserved. No new dependency or permission.
+
 ## 1.0.7 — 2026-11-05
 
 Remove the automatic system display and the duplicate three-cards/combined-card selector. There is now one widget system: add CPU, RAM, storage, network or Systemübersicht yourself, with independent visibility and removal for every instance. Existing independently added widgets remain unchanged. The old global switches and legacy card positions no longer create visible system cards, including after an update or restart. The shared sampler now reads only the metrics requested by enabled widget instances. Its refresh interval is available directly in the widget menu.

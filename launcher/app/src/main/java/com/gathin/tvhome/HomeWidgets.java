@@ -14,11 +14,12 @@ final class HomeWidgets implements PlacementTarget {
     private final ViewTreeObserver.OnGlobalLayoutListener layout=()->schedule();
     HomeWidgets(Activity a,SystemStatsWidget stats,HeaderLayoutController header){this.a=a;this.stats=stats;root=a.findViewById(R.id.root);store=new HomeWidgetStore(a);android=new AndroidWidgetBridge(a,store);quotes=new QuoteFeed(a,state->{for(HomeWidgetCard c:cards.values())c.quote(state);});density=a.getResources().getDisplayMetrics().density;particleLayers=new QuoteParticleLayers(root);store.prefs.registerOnSharedPreferenceChangeListener(listener);root.getViewTreeObserver().addOnGlobalLayoutListener(layout);stats.observe(observer);configure();}
     static String sourceName(Context a,String source){if("network".equals(source))return "Netzwerk · LAN + WLAN";if("android".equals(source))return a.getString(R.string.widgets_android);if("quote".equals(source))return a.getString(R.string.quote_title);WidgetSource s=WidgetSource.find(source);return a.getString(s==WidgetSource.CPU?R.string.system_stats_cpu:s==WidgetSource.RAM?R.string.system_stats_ram:s==WidgetSource.STORAGE?R.string.system_stats_storage:R.string.widgets_summary);}
+    static String metricNames(Context c,int mask){java.util.List<String> names=new java.util.ArrayList<>();if((mask&1)!=0)names.add(c.getString(R.string.system_stats_cpu));if((mask&2)!=0)names.add(c.getString(R.string.system_stats_ram));if((mask&4)!=0)names.add(c.getString(R.string.system_stats_storage));if((mask&8)!=0)names.add("Netzwerk");return names.isEmpty()?"Keine Messwerte":String.join(", ",names);}
     HomeWidgetStore.Spec spec(String key){return store.get(key);}
     private void configure(){if(closed)return;List<HomeWidgetStore.Spec> specs=store.all();Set<String> keep=new HashSet<>();int demand=0;boolean nativeOn=false,quoteOn=false,quoteImages=false;
-        for(HomeWidgetStore.Spec s:specs){keep.add(s.id);WidgetSource source=WidgetSource.find(s.source);int mask=source==null?0:source.mask|("system".equals(s.source)&&s.network?8:0);HomeWidgetCard card=cards.get(s.id);
+        for(HomeWidgetStore.Spec s:specs){keep.add(s.id);WidgetSource source=WidgetSource.find(s.source);int mask=source==null?0:source==WidgetSource.SYSTEM?s.metricsMask:source.mask;HomeWidgetCard card=cards.get(s.id);
             if(card==null||!card.source.equals(s.source)||card.mask!=mask||card.appWidgetId!=s.appWidgetId){if(card!=null){card.close();root.removeView(card);}card=new HomeWidgetCard(a,s,mask,android,particleLayers);cards.put(s.id,card);root.addView(card,new android.widget.FrameLayout.LayoutParams(1,-2));if(snapshot!=null)card.update(snapshot);}
-            card.setVisibility(s.enabled?View.VISIBLE:View.GONE);card.style(s);card.active(active&&s.enabled);card.quote(quotes.state());if(s.enabled&&s.quote()){quoteOn=true;quoteImages|="image".equals(s.quoteMode);}if(s.enabled){demand|=mask;nativeOn|=s.android();}
+            boolean visible=s.enabled&&(!"system".equals(s.source)||mask!=0);card.setVisibility(visible?View.VISIBLE:View.GONE);card.style(s);card.active(active&&visible);card.quote(quotes.state());if(s.enabled&&s.quote()){quoteOn=true;quoteImages|="image".equals(s.quoteMode);}if(s.enabled){demand|=mask;nativeOn|=s.android();}
             int w=Math.round(WidgetSource.width(s.source,s.width,Math.max(1,width()))*density),h=(s.android()||s.quote())?Math.round(Math.min(s.height,height())*density):ViewGroup.LayoutParams.WRAP_CONTENT;ViewGroup.LayoutParams lp=card.getLayoutParams();if(lp.width!=w||lp.height!=h){lp.width=w;lp.height=h;card.setLayoutParams(lp);if(s.android())card.nativeSize(Math.round(w/density),Math.min(s.height,height()));}
         }
         for(String id:new ArrayList<>(cards.keySet()))if(!keep.contains(id)){HomeWidgetCard removed=cards.remove(id);removed.close();root.removeView(removed);}
@@ -28,11 +29,14 @@ final class HomeWidgets implements PlacementTarget {
     private void apply(){if(closed||root.getWidth()==0)return;for(String id:cards.keySet()){HomeWidgetStore.Spec s=spec(id);if(s==null)continue;HomeWidgetCard card=cards.get(id);int x=id.equals(preview)?previewX:s.x,y=id.equals(preview)?previewY:s.y;card.setTranslationX(HeaderLayoutPolicy.clamp(x,width(),Math.round(card.getWidth()/density))*density);card.setTranslationY(HeaderLayoutPolicy.clamp(y,height(),Math.round(card.getHeight()/density))*density);}}
     void refreshStyle(){for(String id:cards.keySet()){HomeWidgetStore.Spec s=spec(id);if(s!=null)cards.get(id).style(s);}}
     void show(String id,boolean on){store.edit(id,s->s.enabled=on);}
+    void metrics(String id,int mask){store.edit(id,s->{s.metricsMask=SystemMetricsPolicy.normalize(mask);s.network=(s.metricsMask&8)!=0;});}
     void metricsStyle(String id,String value){store.edit(id,s->s.metricsStyle=SystemInfoStyle.id(value));}
+    void ringAxis(String id,String value){store.edit(id,s->s.ringAxis=SystemRingPolicy.axis(value));}
+    void ringGap(String id,int value){store.edit(id,s->s.ringGap=SystemRingPolicy.gap(value));}
     void metricsGlass(String id,boolean on){store.edit(id,s->s.metricsGlass=on);}
     void metricsOpacity(String id,int opacity){store.edit(id,s->s.metricsOpacity=SystemWidgetPolicy.opacity(opacity));}
     void automaticHeight(String id){store.edit(id,s->s.metricsHeight=0);}
-    void network(String id,boolean on){store.edit(id,s->s.network=on);}
+    void network(String id,boolean on){store.edit(id,s->{s.network=on;s.metricsMask=on?s.metricsMask|8:s.metricsMask&~8;});}
     void theme(String id,String theme){store.edit(id,s->s.theme=theme);}
     void resize(String id,int width,int height){store.edit(id,s->{s.width=width;if(s.android()||s.quote())s.height=height;else s.metricsHeight=height;});}
     void remove(String id){HomeWidgetStore.Spec s=store.get(id);if(s!=null&&s.android())android.delete(s.appWidgetId);store.remove(id);}

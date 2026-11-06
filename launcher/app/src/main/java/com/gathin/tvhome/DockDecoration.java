@@ -149,8 +149,8 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         if (singleRow) {
             // Tiles past the screen's edge: the band stops at the grid's edge with its rounded end instead of being
             // sliced square there.
-            rect.left = Math.max(rect.left, density);
-            rect.right = Math.min(rect.right, parent.getWidth() - density);
+            rect.left = bandAll ? density : Math.max(rect.left, density);
+            rect.right = bandAll ? parent.getWidth()-density : Math.min(rect.right, parent.getWidth() - density);
         }
         rect.bottom += namesRoom+pageRoom;
         boundsValid=true;

@@ -70,7 +70,7 @@ final class FocusedAppName implements PlacementTarget {
         RecyclerView.ViewHolder holder=grid.getChildViewHolder(item);RecyclerView.Adapter<?> adapter=grid.getAdapter();
         int pos=holder.getBindingAdapterPosition();
         if(!(adapter instanceof AppAdapter)||pos<0||pos>=((AppAdapter)adapter).appCount()){caption.setVisibility(View.INVISIBLE);return;}
-        String label=((AppAdapter)adapter).labelAt(pos);if(!label.contentEquals(caption.getText()))caption.setText(label);
+        caption.setTextColor(prefs.getBoolean(AppTitleStyle.DOMINANT,false)?((AppAdapter)adapter).iconDominantAt(pos):0xF2FFFFFF);String label=((AppAdapter)adapter).labelAt(pos);if(!label.contentEquals(caption.getText()))caption.setText(label);
         // Layout coordinates deliberately exclude the zoom matrix; include the item's pivot animation separately.
         cardBounds.set(0,0,card.getWidth(),card.getHeight());root.offsetDescendantRectToMyCoords(card,cardBounds);
         float left=cardBounds.left+item.getTranslationX()+card.getTranslationX(),top=cardBounds.top+item.getTranslationY()+card.getTranslationY();
