@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.9 — 2026-11-08
+
+Add separate 0–100% controls for the neon-ring halo and colored ring/track opacity. Existing widgets retain 100% values by default; surface opacity remains independent. A fully transparent halo removes the glow without hiding the measurement text.
+
+Add a local Textwidget source with editable text (up to 500 characters), bundled/system font previews, 8–120 sp text size, opacity, optional glass background and independent width, height and D-pad placement. The visible original greeting is migrated once, retaining its text and screen position; existing widgets are preserved. The former greeting view is hidden to avoid duplicate text. No web feed is used for text widgets.
+
+Add clock-over-date and date-over-clock header presets with a single-line date, while keeping the previous layouts and the selected clock font. Header visibility and independently placed widgets remain separate.
+
+Add a centered glass recent-app panel with large horizontally browsable app tiles, an individual × under each app and Alle schließen. Open it from Design & Apps → Geöffnete Apps or opt into holding Back for two seconds. Short Back replays the normal system action; unrelated keys and volume repeats are not consumed. On Home the hold is handled directly; the installed Home accessibility helper provides the global shortcut inside other apps. The panel reads tasks with activities or a still-running root process for the current user through the existing authorized loopback ADB connection, and verifies tasks disappear after an explicit close. Paused tasks can already have been reclaimed by Android; this is not a list of every resident process.
+
+Closing uses a package-name-validated local force-stop command. Home packages, active accessibility helpers, TV-input providers, protected platform/vendor packages and system UIDs are excluded. The activity is private and exposes no command or package extras. No remote host, root access, automatic sweeper or periodic app closing is introduced. Local ADB authorization and active debugging are required, as for the CEC reader; when unavailable the panel explains the limitation instead of claiming apps were closed.
+
+Use a stronger rounded glass panel, a distinct outline and 80% background dim. The panel is a floating modal window; optional native blur is used only on Android 12+ devices reporting OS support, with dim as fallback. The Shield on Android 11 uses the stronger dim. Missing CEC volume feedback is labelled unavailable after a short wait; no percentage is invented and no direct Sonos access is introduced.
+
+500 JVM tests pass; Android lint has zero errors. Native TV QA covers individual/all closing, short/held Back injection, ring opacity, text editing/font/size/placement and both clock layouts. Real-remote validation is recorded separately in the local test evidence.
+
 ## 1.0.8 — 2026-11-06
 
 Keep the Dock Only band at the configured viewport width, including the final page and the last pivot positions. Empty trailing slots no longer shrink the band. Clip both app tiles and item-decoration effects horizontally to the dock viewport, so glass, outlines and shine from adjacent off-screen icons do not leak outside the dock. Vertical focus zoom remains available. Page dots keep the same band center.

@@ -142,6 +142,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The same opt-in menu is available from either hold-OK or the remote's Menu key. */
     private boolean tileMenuEnabled;
     private final LongOkPress appOkPress=new LongOkPress();
+    private final LongOkPress recentBackPress=new LongOkPress();private boolean recentBackHeld,replayRecentBack;
+    private final Runnable showRecentApps=()->{if(recentBackHeld&&hasWindowFocus()&&recentBackPress.fire(android.os.SystemClock.uptimeMillis()))startActivity(new Intent(this,RecentAppsActivity.class));};
+    private void cancelRecentBack(){handler.removeCallbacks(showRecentApps);recentBackPress.cancel();recentBackHeld=false;}
+    private boolean handleRecentBack(KeyEvent event){
+        if(replayRecentBack)return false;
+        if(event.getKeyCode()!=KeyEvent.KEYCODE_BACK){if(event.getAction()==KeyEvent.ACTION_DOWN)cancelRecentBack();return false;}
+        if(!recentBackHeld&&(reordering||openPopup!=null||cardPrompt!=null||!getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean(RecentAppsPolicy.ENABLED,false)))return false;
+        if(event.getAction()==KeyEvent.ACTION_DOWN){if(!recentBackHeld&&event.getRepeatCount()==0){recentBackHeld=true;recentBackPress.press(android.os.SystemClock.uptimeMillis());handler.postDelayed(showRecentApps,LongOkPress.DELAY);}return true;}
+        if(event.getAction()==KeyEvent.ACTION_UP){handler.removeCallbacks(showRecentApps);int action=recentBackPress.release(android.os.SystemClock.uptimeMillis(),event.isCanceled());recentBackHeld=false;if(action==LongOkPress.MENU)startActivity(new Intent(this,RecentAppsActivity.class));else if(action==LongOkPress.CLICK){replayRecentBack=true;try{dispatchKeyEvent(KeyEvent.changeAction(event,KeyEvent.ACTION_DOWN));dispatchKeyEvent(event);}finally{replayRecentBack=false;}}return true;}
+        return true;
+    }
     private View appOkCard;private int appOkCode=-1;
     private boolean quickMove;private int quickMoveOrigin;private Set<String> quickDockBefore;
     private final Runnable showHeldAppMenu=()->{
@@ -1146,7 +1157,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         Config cfg=liveDesignConfig;int rowsBelowDock=singleRow?0:DockPolicy.fullRows(cfg.rowsBelowDock);
             android.content.SharedPreferences placement=getSharedPreferences(Config.SETTINGS_NAME,0);
             boolean positioned=singleRow&&placement.getBoolean(DockPlacementPopup.ENABLED,false);
-            ((DockRecyclerView)grid).clipDockViewport(positioned);
+            ((DockRecyclerView)grid).clipDockViewport(singleRow);
             FrameLayout.LayoutParams gridLp=(FrameLayout.LayoutParams)grid.getLayoutParams();
             int available=((View)grid.getParent()).getWidth();
             int desiredWidth=positioned?DockPlacementPolicy.width(available,placement.getInt(DockPlacementPopup.WIDTH,100)):ViewGroup.LayoutParams.MATCH_PARENT;
@@ -1420,7 +1431,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();cancelDockBrowse();cancelGlassReveal();
-        cancelHeldAppKey();appOkCode=-1;
+        cancelRecentBack();cancelHeldAppKey();appOkCode=-1;
         weatherWidget.stop();
         resumed = false;
         root.removeCallbacks(showIdleClock);
@@ -1550,6 +1561,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if(handleRecentBack(event))return true;
         if(contentPreview!=null&&contentPreview.enterFromDock(event,dockFocused()))return true;
         int backCode=event.getKeyCode();
         if(!reordering&&openPopup==null&&cardPrompt==null&&(backCode==KeyEvent.KEYCODE_BACK||backCode==KeyEvent.KEYCODE_ESCAPE)&&(dockBackHeld||dockFocused())){

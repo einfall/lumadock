@@ -38,6 +38,7 @@ final class DesignStudio {
     private void back(){if(!"root".equals(current)&&!saver&&!standaloneMedia){root();return;}dialog.dismiss();}
     private void root(){reset("root");ScrollView scroll=new ScrollView(a);scroll.setVerticalScrollBarEnabled(false);LinearLayout list=new LinearLayout(a);list.setOrientation(LinearLayout.VERTICAL);scroll.addView(list);page.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         listRow(list,"photo","Hintergrund","Verläufe, Bilder, Live-Hintergründe und Wechsel",()->wallpaperPage("Verläufe"));
+        listRow(list,"grid","Geöffnete Apps","Langes Zurück, einzelne Apps oder alle schließen",()->RecentAppsSettings.show(a));
         listRow(list,"grid","Apps verwalten","Sichtbarkeit, Reihenfolge und PIN",()->DesignPopup.openCategory(a,changed,"apps"));
         listRow(list,"dock","Layout & Dock","Raster, Navigation und Material",()->DesignPopup.openLayout(a,changed));
         listRow(list,"star","Fokus & Effekte","Rahmen, Glanz, Zoom und Mehrfachauswahl",()->FocusMotionPopup.show(a,changed));

@@ -122,7 +122,7 @@ final class CecVolumeOverlay {
                 // A new display session cannot reuse a response from the previous one.
                 if (requestSince != since) { handler.post(read); return; }
                 if(result!=null)frame.state(result.volume,result.muted);
-                else frame.message(needsAuthorization?R.string.cec_volume_authorize:R.string.cec_volume_waiting);
+                else frame.message(needsAuthorization?R.string.cec_volume_authorize:SystemClock.uptimeMillis()>=until?R.string.cec_volume_unavailable:R.string.cec_volume_waiting);
                 if (!needsAuthorization && SystemClock.uptimeMillis() < until) handler.postDelayed(read, 250);
             });
         });

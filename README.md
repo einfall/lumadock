@@ -27,6 +27,9 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 - Glas- und Farb-Themes für Dock, Buttons und Widgets; direkte Vorschau in der Einstellungen-Liste.
 - Fotos, Verläufe und stumme Live-Hintergründe, Favoriten per langem OK und kombinierbare Wechselregeln.
 - Frei platzierbare Uhr, Datum, Wetter und Systemanzeigen; eigene Widget-Quellen und Android-Widgets.
+- Eigener Begrüßungstext als frei gestaltbares Textwidget; Uhrzeit/Datum wahlweise zweizeilig.
+- Systeminformationen mit wählbaren Messwerten, Ring-Themes und getrennten Deckkraft-Reglern für Linie und Leuchten.
+- Geöffnete Apps per langem Zurück, große App-Kacheln und einzelnes/gesammeltes Schließen über autorisierte lokale ADB.
 - Spruch-Widget als Text/Bild, Schriftvorschau und Pixel-Ein-/Ausflug mit Ebenen vor/hinter dem Dock.
 - PIN-Schutz einzelner App-Starts im Launcher, Ausblenden und Verschieben per langem OK.
 - Bildschirmschoner, Sleeptimer mit Countdown und optionale HDMI-CEC-Lautstärkeanzeige.

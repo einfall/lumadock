@@ -52,7 +52,7 @@ import java.util.Set;
 public class HomeKeyService extends AccessibilityService {
 
     /** restore_key_services was on when the config was read: this helper is noted for ServiceRepair. */
-    private boolean repairRecord;
+    private boolean repairRecord;private BackHoldHandler recentBack;
     /** Remote buttons that should open Settings (config.xml, settings_key_scancodes and settings_key_keycodes). */
     private int[] settingsScancodes = new int[0];
     private int[] settingsKeycodes = new int[0];
@@ -154,7 +154,7 @@ public class HomeKeyService extends AccessibilityService {
 
     @Override
     public void onDestroy() {
-        if (running == this) running = null;
+        if (recentBack != null) recentBack.close();if (running == this) running = null;
         if (sleepCountdown != null) sleepCountdown.close();
         if (cecVolume != null) cecVolume.close();
         stopWaitingForUnlock();
@@ -202,7 +202,7 @@ public class HomeKeyService extends AccessibilityService {
 
     private void loadConfig() {
         // Keycodes and the panel choice can also come from a theme; theme.sh restarts this service.
-        Config config = Config.load(this);
+        Config config = Config.load(this);if(recentBack==null)recentBack=new BackHoldHandler(this);
         cecOverlay();
         SleepTimer.restore(this);
         // restore_key_services: note that this helper runs, so Home can put it back after a force stop. Here, not
@@ -276,7 +276,7 @@ public class HomeKeyService extends AccessibilityService {
     protected boolean onKeyEvent(KeyEvent event) {
         // Fixed-volume HDMI sources may send CEC keys without VOLUME_CHANGED_ACTION.
         // Observe only: keep the original key, native CEC handling and held-key repeats.
-        int key=event.getKeyCode();
+        if(recentBack!=null&&recentBack.handle(event))return true;int key=event.getKeyCode();
         if(event.getAction()==KeyEvent.ACTION_DOWN
                 &&(key==KeyEvent.KEYCODE_VOLUME_UP||key==KeyEvent.KEYCODE_VOLUME_DOWN||key==KeyEvent.KEYCODE_VOLUME_MUTE)
                 &&getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean(CecVolumeOverlay.KEY,false)) {

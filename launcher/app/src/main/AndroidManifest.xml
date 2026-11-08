@@ -122,6 +122,8 @@
         </activity>
 
         <receiver android:name=".SleepTimerReceiver" android:exported="false" />
+        <activity android:name=".RecentAppsActivity" android:exported="false" android:excludeFromRecents="true" android:launchMode="singleTask" android:theme="@style/Theme.RecentApps" />
+
         <activity android:name=".AppGateActivity" android:exported="false"
             android:taskAffinity="" android:excludeFromRecents="true" android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />

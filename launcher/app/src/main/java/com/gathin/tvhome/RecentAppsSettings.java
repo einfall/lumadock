@@ -1,0 +1,6 @@
+package com.gathin.tvhome;
+import android.app.*;
+import android.content.*;
+final class RecentAppsSettings {
+    static void show(Activity a){android.content.SharedPreferences prefs=a.getSharedPreferences(Config.SETTINGS_NAME,0);SettingsSheet s=new SettingsSheet(a,"Geöffnete Apps");s.toggle("Zurück lange halten", "Nach 2 Sekunden App-Übersicht öffnen; kurzer Druck bleibt Zurück",prefs.getBoolean(RecentAppsPolicy.ENABLED,false),on->prefs.edit().putBoolean(RecentAppsPolicy.ENABLED,on).apply());s.toggle("Hintergrund weichzeichnen",RecentAppsAppearance.supported(a)?"Natives System-Blur hinter der App-Übersicht":"Auf diesem Gerät nicht verfügbar · kräftige Abdunklung bleibt aktiv",prefs.getBoolean(RecentAppsAppearance.BLUR,false),on->prefs.edit().putBoolean(RecentAppsAppearance.BLUR,on).apply());s.row("grid","App-Übersicht öffnen", "Große App-Kacheln mit × und Alle schließen",()->a.startActivity(new Intent(a,RecentAppsActivity.class)));s.info("Auf Home funktioniert langes Zurück direkt. In anderen Apps benötigt es die Luma-Home-Bedienungshilfe. Die Übersicht und das Schließen nutzen die bereits autorisierte lokale ADB-Verbindung. Launcher, Eingänge und Systemdienste sind geschützt.");s.row("settings","Bedienungshilfen",null,()->a.startActivity(SystemSettings.intent(a,android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)));s.show();}
+}

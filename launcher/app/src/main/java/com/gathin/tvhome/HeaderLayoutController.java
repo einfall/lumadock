@@ -11,14 +11,14 @@ final class HeaderLayoutController implements PlacementTarget {
     static final String[] KEYS={"greeting","clock","date","weather","cpu","ram","storage"};
     private static final int[] IDS={R.id.greeting,R.id.clock,R.id.dateBlock,R.id.weatherBlock,R.id.systemCpu,R.id.systemRam,R.id.systemStorage};
     private final Activity a;private final View root;private final SharedPreferences prefs;private final View[] views=new View[7];private final float density;private final boolean greetingDefault,statsDefault;
-    private final int greetingWidth,dateWidth,dividerVisibility;private final float dateWeight,headerElevation;
+    private final android.widget.TextClock dateClock;private final CharSequence date12,date24;private final int dateHeight;private final int greetingWidth,dateWidth,dividerVisibility;private final float dateWeight,headerElevation;
     private boolean pending,closed;private String previewKey;private int previewX,previewY;
     private final ViewTreeObserver.OnGlobalLayoutListener layout=()->schedule();
     private final SharedPreferences.OnSharedPreferenceChangeListener listener=(p,key)->{if(key!=null&&(key.startsWith(P)||key.startsWith("system_stats_")))schedule();};
     HeaderLayoutController(Activity a,Config cfg){
         this.a=a;root=a.findViewById(R.id.root);prefs=a.getSharedPreferences(Config.SETTINGS_NAME,0);density=a.getResources().getDisplayMetrics().density;greetingDefault=cfg.showGreeting;statsDefault=cfg.showStats;
         for(int i=0;i<views.length;i++){views[i]=a.findViewById(IDS[i]);for(View v=views[i];v.getParent() instanceof ViewGroup;){ViewGroup parent=(ViewGroup)v.getParent();parent.setClipChildren(false);parent.setClipToPadding(false);v=parent;}}
-        greetingWidth=views[0].getLayoutParams().width;LinearLayout.LayoutParams date=(LinearLayout.LayoutParams)views[2].getLayoutParams();dateWidth=date.width;dateWeight=date.weight;dividerVisibility=a.findViewById(R.id.clockDivider).getVisibility();headerElevation=((View)a.findViewById(R.id.leftBlock).getParent()).getElevation();
+        dateClock=a.findViewById(R.id.date);date12=dateClock.getFormat12Hour();date24=dateClock.getFormat24Hour();dateHeight=views[2].getLayoutParams().height;greetingWidth=views[0].getLayoutParams().width;LinearLayout.LayoutParams date=(LinearLayout.LayoutParams)views[2].getLayoutParams();dateWidth=date.width;dateWeight=date.weight;dividerVisibility=a.findViewById(R.id.clockDivider).getVisibility();headerElevation=((View)a.findViewById(R.id.leftBlock).getParent()).getElevation();
         prefs.registerOnSharedPreferenceChangeListener(listener);root.getViewTreeObserver().addOnGlobalLayoutListener(layout);schedule();
     }
     static boolean weatherShown(Context c){return c.getSharedPreferences(Config.SETTINGS_NAME,0).getBoolean(P+"show_weather",true);}
@@ -43,7 +43,8 @@ final class HeaderLayoutController implements PlacementTarget {
     void apply(){
         if(closed||root.getWidth()==0)return;boolean custom=custom();boolean resized=false;
         ViewGroup.LayoutParams greeting=views[0].getLayoutParams();int gw=custom?ViewGroup.LayoutParams.WRAP_CONTENT:greetingWidth;if(greeting.width!=gw){greeting.width=gw;views[0].setLayoutParams(greeting);resized=true;}
-        LinearLayout.LayoutParams date=(LinearLayout.LayoutParams)views[2].getLayoutParams();int dw=custom?Math.round(154*density):dateWidth;float weight=custom?0:dateWeight;if(date.width!=dw||date.weight!=weight){date.width=dw;date.weight=weight;views[2].setLayoutParams(date);resized=true;}
+        String mode=HeaderLayoutPolicy.mode(prefs.getString(MODE,"legacy"));boolean two="clock_date".equals(mode)||"date_clock".equals(mode);CharSequence f12=two?"EEE, d. MMMM":date12,f24=two?"EEE, d. MMMM":date24;if(!android.text.TextUtils.equals(dateClock.getFormat12Hour(),f12))dateClock.setFormat12Hour(f12);if(!android.text.TextUtils.equals(dateClock.getFormat24Hour(),f24))dateClock.setFormat24Hour(f24);if(dateClock.getMaxLines()!=(two?1:2))dateClock.setMaxLines(two?1:2);
+        LinearLayout.LayoutParams date=(LinearLayout.LayoutParams)views[2].getLayoutParams();int dh=two?Math.round(26*density):dateHeight;if(date.height!=dh){date.height=dh;views[2].setLayoutParams(date);resized=true;}int dw=custom?Math.round((two?260:154)*density):dateWidth;float weight=custom?0:dateWeight;if(date.width!=dw||date.weight!=weight){date.width=dw;date.weight=weight;views[2].setLayoutParams(date);resized=true;}
         View stats=a.findViewById(R.id.stats);int cardWidth=Math.max(1,Math.min(Math.round(140*density),(stats.getWidth()-Math.round(15*density))/3));
         for(int i=4;i<7;i++){LinearLayout.LayoutParams lp=(LinearLayout.LayoutParams)views[i].getLayoutParams();int w=custom?cardWidth:0;float wt=custom?0:1;if(lp.width!=w||lp.weight!=wt){lp.width=w;lp.weight=wt;views[i].setLayoutParams(lp);resized=true;}}
         for(int i=0;i<3;i++){int visibility=shown(KEYS[i])?View.VISIBLE:View.INVISIBLE;if(views[i].getVisibility()!=visibility)views[i].setVisibility(visibility);}
