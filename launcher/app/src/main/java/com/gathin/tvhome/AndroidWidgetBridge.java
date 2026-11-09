@@ -8,13 +8,22 @@ import android.widget.*;
 import java.util.*;
 /** Standard AppWidgetHost binding/configuration. No automatic privileged grants or hidden shell calls. */
 final class AndroidWidgetBridge {
+    static final int HOST_ID = 60431;
     static final int BIND=7181,CONFIGURE=7182;private static final String PENDING=HomeWidgetStore.P+"pending_android_id",STAGE=HomeWidgetStore.P+"pending_android_stage";
     private final Activity a;private final HomeWidgetStore store;private final AppWidgetManager manager;private final Host host;private boolean listening,active;
     private final BroadcastReceiver display=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){listen();}};
     AndroidWidgetBridge(Activity a,HomeWidgetStore store){this.a=a;this.store=store;manager=AppWidgetManager.getInstance(a);host=new Host(a);IntentFilter f=new IntentFilter(Intent.ACTION_SCREEN_ON);f.addAction(Intent.ACTION_SCREEN_OFF);if(Build.VERSION.SDK_INT>=33)a.registerReceiver(display,f,Context.RECEIVER_NOT_EXPORTED);else a.registerReceiver(display,f);}
     List<AppWidgetProviderInfo> providers(){try{List<AppWidgetProviderInfo> list=new ArrayList<>(manager.getInstalledProviders());list.sort((x,y)->label(x).compareToIgnoreCase(label(y)));return list;}catch(RuntimeException ex){return Collections.emptyList();}}
     String label(AppWidgetProviderInfo info){try{String label=info.loadLabel(a.getPackageManager());return label==null?info.provider.getPackageName():label;}catch(RuntimeException ex){return info.provider.getPackageName();}}
-    void choose(){SettingsSheet p=new SettingsSheet(a,a.getString(R.string.widgets_android));List<AppWidgetProviderInfo> list=providers();p.info(a.getString(list.isEmpty()?R.string.widgets_android_empty:R.string.widgets_android_hint));for(AppWidgetProviderInfo info:list){LinearLayout row=p.row("grid",label(info),info.provider.getPackageName(),()->{p.dialog.dismiss();begin(info);});try{((ImageView)row.getChildAt(0)).setImageDrawable(info.loadIcon(a,0));((ImageView)row.getChildAt(0)).setImageTintList(null);}catch(RuntimeException ignored){}}p.show();}
+    void choose(){SettingsSheet p=new SettingsSheet(a,a.getString(R.string.widgets_android));List<AppWidgetProviderInfo> list=providers();p.info(a.getString(list.isEmpty()?R.string.widgets_android_empty:R.string.widgets_android_hint));for(AppWidgetProviderInfo info:list)p.add(WidgetPreview.tile(a,preview(info),label(info),info.provider.getPackageName(),()->{p.dialog.dismiss();begin(info);}));p.show();}
+    View preview(int id){return preview(manager.getAppWidgetInfo(id));}
+    private View preview(AppWidgetProviderInfo info){
+        android.graphics.drawable.Drawable art=null;
+        if(info!=null)try{art=info.loadPreviewImage(a,android.util.DisplayMetrics.DENSITY_MEDIUM);if(art==null)art=info.loadIcon(a,android.util.DisplayMetrics.DENSITY_MEDIUM);}catch(RuntimeException ignored){}
+        ImageView image=WidgetPreview.image(a,art==null?new AppGlyph("grid"):art);
+        image.setBackground(SurfaceThemes.background(a,"graphite",false));
+        return image;
+    }
     private void begin(AppWidgetProviderInfo info){if(store.full()){toast(R.string.widgets_limit);return;}cancelPending();try{
         int id=host.allocateAppWidgetId();store.prefs.edit().putInt(PENDING,id).putString(STAGE,"bind").apply();Bundle options=new Bundle();options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
         if(manager.bindAppWidgetIdIfAllowed(id,info.getProfile(),info.provider,options)){configure(id);return;}
@@ -39,6 +48,6 @@ final class AndroidWidgetBridge {
     void start(){active=true;listen();}void stop(){active=false;listen();}
     private void listen(){PowerManager power=a.getSystemService(PowerManager.class);boolean on=active&&power!=null&&power.isInteractive();if(on==listening)return;try{if(on)host.startListening();else host.stopListening();listening=on;}catch(RuntimeException ignored){listening=false;}}
     void close(){stop();host.release();a.unregisterReceiver(display);}
-    private static final class Host extends AppWidgetHost{Host(Context c){super(c,60431);}void release(){clearViews();}}
+    private static final class Host extends AppWidgetHost{Host(Context c){super(c,HOST_ID);}void release(){clearViews();}}
     private void toast(int text){Toast.makeText(a,text,Toast.LENGTH_LONG).show();}
 }

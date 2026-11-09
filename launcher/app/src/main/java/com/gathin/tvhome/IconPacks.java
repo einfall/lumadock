@@ -32,9 +32,10 @@ final class IconPacks {
                 if(value.string!=null&&!value.string.toString().endsWith(".xml")){
                     BitmapFactory.Options o=new BitmapFactory.Options();o.inJustDecodeBounds=true;BitmapFactory.decodeResource(res,id,o);if(o.outWidth<1||o.outHeight<1)return null;
                     o.inSampleSize=1;while(o.outWidth/o.inSampleSize>384||o.outHeight/o.inSampleSize>384)o.inSampleSize*=2;o.inJustDecodeBounds=false;o.inScaled=false;
-                    Bitmap bitmap=BitmapFactory.decodeResource(res,id,o);return bitmap==null?null:new BitmapDrawable(res,bitmap);
+                    Bitmap bitmap = BitmapFactory.decodeResource(res, id, o);
+                    return bitmap == null ? null : IconPackArtwork.from(res, new BitmapDrawable(res, bitmap));
                 }
-                return res.getDrawable(id,null);
+                return IconPackArtwork.from(res, res.getDrawable(id, null));
             }catch(RuntimeException|OutOfMemoryError ignored){return null;}
         }
     }

@@ -13,4 +13,8 @@
 <string name="dock_wrap_hint">Im Modus „Nur Dock“ vom letzten zum ersten App-Icon wechseln und umgekehrt.</string>
 <string name="dock_counter">Positions-Pille anzeigen</string>
 <string name="dock_counter_hint">Im Modus „Nur Dock“ die Position anzeigen, zum Beispiel 1 / 20.</string>
+<string name="dock_counter_move">Positions-Pille verschieben</string>
+<string name="dock_counter_move_hint">Pfeiltasten bewegen · OK speichert · Zurück verwirft</string>
+<string name="dock_counter_move_unavailable">Bitte zuerst „Nur Dock“ und die Positions-Pille einschalten.</string>
+<string name="dock_counter_reset">Standardposition der Pille wiederherstellen</string>
 </resources>

@@ -26,7 +26,8 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 - Fokusrahmen, Abstand, Stärke, Glanz, Farbverläufe, Glow und Zoom getrennt anpassbar.
 - Glas- und Farb-Themes für Dock, Buttons und Widgets; direkte Vorschau in der Einstellungen-Liste.
 - Fotos, Verläufe und stumme Live-Hintergründe, Favoriten per langem OK und kombinierbare Wechselregeln.
-- Frei platzierbare Uhr, Datum, Wetter und Systemanzeigen; eigene Widget-Quellen und Android-Widgets.
+- Frei platzierbare Uhr, Datum und Wetter. Eigene Widgets mit Vorschaukacheln, vier Digitaluhr-Stilen, Monats- und Wochenkalender sowie Android-Widgets.
+- Echo-Wiedergabe über Home Assistant mit Geräteauswahl, Titel, Cover und Fortschritt.
 - Eigener Begrüßungstext als frei gestaltbares Textwidget; Uhrzeit/Datum wahlweise zweizeilig.
 - Systeminformationen mit wählbaren Messwerten, Ring-Themes und getrennten Deckkraft-Reglern für Linie und Leuchten.
 - Geöffnete Apps per langem Zurück, große App-Kacheln und einzelnes/gesammeltes Schließen über autorisierte lokale ADB.
@@ -34,3 +35,7 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 - PIN-Schutz einzelner App-Starts im Launcher, Ausblenden und Verschieben per langem OK.
 - Bildschirmschoner, Sleeptimer mit Countdown und optionale HDMI-CEC-Lautstärkeanzeige.
 - **Info** mit Version, täglicher Update-Prüfung, optionalem Download und geprüftem Android-Installer.
+
+## Beta
+
+[Version 1.1.8 Beta](https://github.com/einfall/lumadock/releases/tag/v1.1.8) ist als APK zur manuellen Installation verfügbar. Der automatische Update-Kanal verwendet stabile Releases.

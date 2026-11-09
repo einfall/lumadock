@@ -66,7 +66,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static final class Entry {
-        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3;
+        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3, FOLDER = 4;
+        List<Entry> folderApps = java.util.Collections.emptyList();
 
         final int kind;
         final String label;
@@ -310,7 +311,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // banner skips loading and decoding it.
             Drawable icon = banner == null ? ri.loadIcon(pm) : null;
             Drawable chosenIcon = AppAppearance.icon(ctx, component);
-            if (chosenIcon != null) { banner = iconBanner(chosenIcon); icon = null; }
+            if (chosenIcon != null) {
+                banner = chosenIcon instanceof IconPackArtwork ? chosenIcon : iconBanner(chosenIcon);
+                icon = null;
+            }
             if (card != null) {
                 fresh.add(new Entry(Entry.CARD, label, component, banner, icon, card.caption, card.accent));
             } else {
@@ -332,6 +336,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (ca != cb) return ca ? -1 : 1;
             return a.label.compareToIgnoreCase(b.label);
         });
+        groupFolders(fresh);
         // Retain the optional Default-home tile until dependent tile-ordering work is merged.
         if (showHomeSettings
                 && pm.resolveActivity(new Intent(Settings.ACTION_HOME_SETTINGS), 0) != null) {
@@ -359,6 +364,70 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         items.clear();
         items.addAll(fresh);
         notifyDataSetChanged();
+    }
+
+    private void groupFolders(List<Entry> entries) {
+        List<Entry> tiles = new ArrayList<>();
+        for (DockFolders.Folder folder : DockFolders.load(ctx)) {
+            List<Entry> members = new ArrayList<>();
+            for (Entry entry : entries) {
+                if (folder.packages.contains(entry.pkg)) members.add(entry);
+            }
+            if (members.isEmpty()) continue;
+            Entry tile = new Entry(Entry.FOLDER, folder.name, folder.component(),
+                    folderBanner(folder.name), null, null, 0);
+            tile.folderApps = members;
+            entries.removeAll(members);
+            tiles.add(tile);
+        }
+        if (tiles.isEmpty()) return;
+
+        // Folders reserve dock slots. Remember their custom order when a tile order already exists.
+        List<Entry> dock = new ArrayList<>(tiles);
+        for (Entry entry : entries) {
+            if (isDocked(entry)) dock.add(entry);
+        }
+        dock.sort((left, right) -> Order.compare(savedRanks,
+                left.component.flattenToShortString(), right.component.flattenToShortString()));
+        List<Entry> overflow = new ArrayList<>();
+        int freeSlots = Math.max(0, dockSize - tiles.size());
+        for (Entry entry : dock) {
+            if (entry.kind == Entry.FOLDER) continue;
+            if (freeSlots > 0) freeSlots--;
+            else overflow.add(entry);
+        }
+        dock.removeAll(overflow);
+        entries.removeAll(dock);
+        entries.removeAll(overflow);
+        entries.addAll(0, overflow);
+        entries.addAll(0, dock);
+    }
+
+    private Drawable folderBanner(String name) {
+        int width = 320;
+        int height = 180;
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
+                width, height, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+        android.text.TextPaint paint = new android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        paint.setShader(new android.graphics.LinearGradient(0, 0, width, height,
+                0xFF273951, 0xFF111B2A, android.graphics.Shader.TileMode.CLAMP));
+        canvas.drawRect(0, 0, width, height, paint);
+        paint.setShader(null);
+        Drawable folder = new AppGlyph("folder");
+        folder.setBounds(125, 24, 195, 94);
+        folder.draw(canvas);
+        paint.setColor(0xFFF1F5FF);
+        paint.setTextSize(28);
+        paint.setTextAlign(android.graphics.Paint.Align.CENTER);
+        paint.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+        CharSequence label = android.text.TextUtils.ellipsize(name, paint, width - 38, android.text.TextUtils.TruncateAt.END);
+        canvas.drawText(label, 0, label.length(), width / 2f, 135, paint);
+        return new android.graphics.drawable.BitmapDrawable(ctx.getResources(), bitmap);
+    }
+
+    boolean folderAt(int position) {
+        return position >= 0 && position < items.size() && items.get(position).kind == Entry.FOLDER;
     }
 
     /** icon_tiles: the app's icon centred on a dark banner-shaped tile, for apps whose own banner crops badly. */
@@ -506,11 +575,15 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         h.card.setScaleY(focused && animations ? focusScale() : 1f);
         h.card.setTranslationY(focused && advancedEffects && !dockKind ? -4f * ctx.getResources().getDisplayMetrics().density : 0f);
         h.card.setTranslationZ(focused && advancedEffects ? 8f * ctx.getResources().getDisplayMetrics().density : 0f);
-        h.banner.setScaleX(focused && advancedEffects && focusMotion.zoom ? 1.035f : 1f);
-        h.banner.setScaleY(focused && advancedEffects && focusMotion.zoom ? 1.035f : 1f);
+        h.packArtwork = e.banner instanceof IconPackArtwork;
+        h.banner.setScaleType(h.packArtwork ? ImageView.ScaleType.FIT_CENTER : ImageView.ScaleType.CENTER_CROP);
+        float artworkZoom = focused && advancedEffects && focusMotion.zoom && !h.packArtwork ? 1.035f : 1f;
+        h.banner.setScaleX(artworkZoom);
+        h.banner.setScaleY(artworkZoom);
         // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
         // nothing on every frame; keep it under banners with transparent parts and under icon tiles.
-        h.card.setBackground(e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE ? null : h.cardBackground);
+        boolean fullBanner = e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE;
+        h.card.setBackground(h.packArtwork || fullBanner ? null : h.cardBackground);
         if (uniformTiles && e.banner == null) {
             if (e.backdrop == null) e.backdrop = backdrop(e.icon, ambientColorAt(position));
             h.card.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, e.backdrop));
@@ -528,6 +601,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.label.setText(e.label);
             h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
         }
+        h.card.invalidateOutline();
         h.card.setForeground(null); // TileEffectsDecoration also allows a rim outside the artwork.
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
@@ -548,6 +622,22 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     /** Opens the tile's activity by explicit component, with no extras: a card can name nothing else. */
     private void launch(Entry e) {
+        if (e.kind == Entry.FOLDER && ctx instanceof Activity) {
+            Activity activity = (Activity) ctx;
+            SettingsSheet folder = new SettingsSheet(activity, e.label);
+            for (Entry app : e.folderApps) {
+                android.widget.LinearLayout row = folder.row(null, app.label, null, () -> launch(app));
+                Drawable icon = app.icon != null ? app.icon : app.banner;
+                if (icon != null && icon.getConstantState() != null) {
+                    android.widget.ImageView image = new android.widget.ImageView(activity);
+                    image.setImageDrawable(icon.getConstantState().newDrawable(activity.getResources()));
+                    int size = SettingsSheet.dp(activity, 28);
+                    row.addView(image, 0, new android.widget.LinearLayout.LayoutParams(size, size));
+                }
+            }
+            folder.show();
+            return;
+        }
         if (e.kind == Entry.HOME_SETTINGS) {
             ctx.startActivity(new Intent(ctx, HomeSettingsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -616,6 +706,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * the owner moved into the dock stays there (#499); else a dock_apps entry.
      */
     private boolean isDocked(Entry e) {
+        if (e.kind == Entry.FOLDER) return true;
         if (savedDocked < 0) return favourites.contains(e.pkg);
         Integer rank = savedRanks.get(e.component.flattenToShortString());
         return rank != null && rank < savedDocked;
@@ -706,7 +797,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /** A vivid colour sampled from the app's banner (or icon), cached per entry; a card's accent when it set one. */
     int iconDominantAt(int position){
         if(position<0||position>=items.size())return 0xFFB8C0CC;Entry e=items.get(position);
-        if(e.iconDominant==0){Drawable d=AppAppearance.icon(ctx,e.pkg);if(d==null)try{d=ctx.getPackageManager().getApplicationIcon(e.pkg);}catch(PackageManager.NameNotFoundException ignored){}e.iconDominant=dominantColor(d);if(e.iconDominant==0xFF6E6E73)e.iconDominant=0xFFB8C0CC;}
+        if(e.iconDominant==0){Drawable d=e.banner instanceof IconPackArtwork ? e.banner : AppAppearance.icon(ctx,e.pkg);if(d==null)try{d=ctx.getPackageManager().getApplicationIcon(e.pkg);}catch(PackageManager.NameNotFoundException ignored){}e.iconDominant=dominantColor(d);if(e.iconDominant==0xFF6E6E73)e.iconDominant=0xFFB8C0CC;}
         return e.iconDominant;
     }
     int ambientColorAt(int position) {
@@ -912,6 +1003,16 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return 16f * density * Math.min(1f, tileWidthPx / (DESIGN_W_DP * density));
     }
 
+    static void artBounds(View card, Rect output) {
+        ImageView banner = card.findViewById(R.id.banner);
+        Drawable drawable = banner == null ? null : banner.getDrawable();
+        if (drawable instanceof IconPackArtwork) {
+            ((IconPackArtwork) drawable).fit(card.getWidth(), card.getHeight(), output);
+        } else {
+            output.set(0, 0, card.getWidth(), card.getHeight());
+        }
+    }
+
     static final class Holder extends RecyclerView.ViewHolder {
         final View card;
         /** item_app.xml's tile_bg: the dark card behind an icon tile, or behind a banner that has transparent parts. */
@@ -928,6 +1029,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final FocusMotion motion;
         /** A dock tile: it grows in place without advanced_effects' lift, which reads as off-centre in the band (#2135). */
         boolean inDock;
+        boolean packArtwork;
 
         Holder(View v, TileListener listener, boolean animations, boolean advancedEffects,
                boolean reducedMotion, float restNameAlpha, FocusMotion motion) {
@@ -948,10 +1050,12 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             final float density = v.getResources().getDisplayMetrics().density;
             card.setOutlineProvider(new ViewOutlineProvider() {
+                private final Rect art = new Rect();
+
                 @Override
                 public void getOutline(View view, Outline outline) {
-                    // 16dp at the design width, scaled down with the tile so small tiles keep the same shape.
-                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius(view.getWidth(), density));
+                    artBounds(view, art);
+                    outline.setRoundRect(art, cornerRadius(art.width(), density));
                 }
             });
             card.setClipToOutline(true);
@@ -1000,7 +1104,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             .setDuration(motion.duration(focused,false,advancedEffects))
                             .setInterpolator(motion.useBounce(false)?new OvershootInterpolator(focused?1.4f:.8f):new DecelerateInterpolator(1.5f))
                             .withLayer().start();
-                    if (advancedEffects && motion.zoom) {
+                    if (advancedEffects && motion.zoom && !packArtwork) {
                         banner.animate().scaleX(focused ? 1.035f : 1f).scaleY(focused ? 1.035f : 1f)
                                 .setDuration(280).start();
                     }

@@ -20,7 +20,7 @@
 <string name="widgets_instances">Eigene Widget-Instanzen</string>
 <string name="widgets_add">Widget aus eigener Quelle hinzufügen</string>
 <string name="widgets_sources">Eigene Widget-Quelle auswählen</string>
-<string name="widgets_sources_hint">Systeminformationen mit Messwert- und Theme-Auswahl oder Spruch des Tages</string>
+<string name="widgets_sources_hint">Uhren, Kalender und weitere Widgets mit Vorschau</string>
 <string name="widgets_source_note">Eine Quelle lässt sich mehrfach verwenden. Alle Instanzen nutzen dieselbe Messung. Bis zu zwölf Widgets.</string>
 <string name="widgets_hint">Jedes Widget lässt sich einzeln hinzufügen, ausblenden, entfernen, gestalten und positionieren. Ohne hinzugefügte Widgets bleibt die Systemanzeige leer.</string>
 <string name="widgets_limit">Maximal zwölf Widgets. Entferne zuerst eine Instanz.</string>

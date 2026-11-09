@@ -1,10 +1,11 @@
 package com.gathin.tvhome;
 /** Internal widget source registry. Instances share data; a new source has one stable ID and metric mask. */
 enum WidgetSource {
-    CPU("cpu",1,"cpu"), RAM("ram",2,"memory"), STORAGE("storage",4,"storage"), SYSTEM("system",7,"cpu"), NETWORK("network",8,"network"), QUOTE("quote",0,"text"), TEXT("text",0,"text");
+    CPU("cpu",1,"cpu"), RAM("ram",2,"memory"), STORAGE("storage",4,"storage"), SYSTEM("system",7,"cpu"), NETWORK("network",8,"network"), QUOTE("quote",0,"text"), ECHO("echo",0,"music"), TEXT("text",0,"text"),
+    CLOCK("clock",0,"timer"), CALENDAR("calendar",0,"grid");
     final String id,glyph;final int mask;
     WidgetSource(String id,int mask,String glyph){this.id=id;this.mask=mask;this.glyph=glyph;}
     static WidgetSource find(String id){for(WidgetSource s:values())if(s.id.equals(id))return s;return null;}
     static int demand(boolean legacy,int mask,int external){return (legacy?mask:0)|(external&15);}
-    static int width(String source,int value,int screen){return Math.max(1,Math.min(Math.max(1,screen),Math.max("quote".equals(source)?240:64,Math.min("android".equals(source)?Math.max(1,screen):480,value))));}
+    static int width(String source,int value,int screen){return Math.max(1,Math.min(Math.max(1,screen),Math.max("quote".equals(source)?240:"echo".equals(source)?160:64,Math.min("android".equals(source)?Math.max(1,screen):480,value))));}
 }

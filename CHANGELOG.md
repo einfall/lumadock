@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.8 Beta — 2026-11-09
+
+- Add a visual widget catalog and previews for configured widgets. Built-in time widgets include Arc Clock, Arc Hours Clock, Calendar Clock, Departure Clock, and month and week calendars.
+- Keep one system information widget per profile, with all display themes and selectable CPU, RAM, storage and network metrics. For older layouts, active and customized widgets take priority over unused duplicates.
+- Show Echo playback through Home Assistant with a device picker, cover art, progress when timing data is available, and five layouts plus automatic sizing.
+- Add design profiles and layout backup/import, dock folders, placement guides, adjustable dock counter, flexible app title alignment and transitions, and focus frames that match icon-pack artwork.
+- 516 unit tests passed and Android lint reported no errors. Widget selection and preview were verified on a Philips Android TV.
+
 ## 1.0.9 — 2026-11-08
 
 Add separate 0–100% controls for the neon-ring halo and colored ring/track opacity. Existing widgets retain 100% values by default; surface opacity remains independent. A fully transparent halo removes the glow without hiding the measurement text.

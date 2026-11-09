@@ -58,6 +58,9 @@ assert 'versionCode ' + str(meta['version_code']) in gradle
 assert "versionName '" + meta['version'] + "'" in gradle
 
 tag = 'v' + meta['version']
+prerelease = meta.get('prerelease', False)
+assert type(prerelease) is bool
+release_name = 'Luma Dock ' + meta['version'] + (' Beta' if prerelease else '')
 manifest = {
     'schema_version': 1, 'package_name': 'com.gathin.tvhome',
     'version_name': meta['version'], 'version_code': meta['version_code'],
@@ -76,8 +79,8 @@ except urllib.error.HTTPError as error:
         raise
     release = api('POST', '/releases', {
         'tag_name': tag, 'target_commitish': meta['source_sha'],
-        'name': 'Luma Dock ' + meta['version'], 'body': meta['notes'],
-        'draft': True, 'prerelease': False,
+        'name': release_name, 'body': meta['notes'],
+        'draft': True, 'prerelease': prerelease,
     })
 if not release['draft']:
     raise RuntimeError('A published release with this version already exists; it is not overwritten')
@@ -87,7 +90,7 @@ for asset_name, asset_bytes in [(name, data), ('update.json', raw_manifest), ('S
         raise RuntimeError('A draft asset already exists: ' + asset_name)
     upload = 'https://uploads.github.com/repos/' + repo + '/releases/' + str(release['id']) + '/assets?name=' + urllib.parse.quote(asset_name)
     api('POST', upload, binary=asset_bytes)
-published = api('PATCH', '/releases/' + str(release['id']), {'draft': False, 'make_latest': 'true'})
+published = api('PATCH', '/releases/' + str(release['id']), {'draft': False, 'prerelease': prerelease, 'make_latest': 'false' if prerelease else 'true'})
 print('Published:', published['html_url'])
 branch = os.environ.get('GITHUB_REF_NAME', '')
 if branch.startswith('release-upload/'):

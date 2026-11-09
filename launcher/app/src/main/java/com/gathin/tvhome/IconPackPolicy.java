@@ -10,5 +10,9 @@ final class IconPackPolicy {
         if(!pkg.matches("[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+")||!activity.matches("[A-Za-z0-9_.$]+"))return "";
         if(activity.startsWith("."))activity=pkg+activity;return pkg+"/"+activity;
     }
+    static float fitScale(int width, int height, int slotWidth, int slotHeight) {
+        return Math.min(slotWidth / (float) width, slotHeight / (float) height);
+    }
+
     static boolean drawable(String value){return value!=null&&value.length()<=180&&value.matches("[a-z][a-z0-9_]*");}
 }

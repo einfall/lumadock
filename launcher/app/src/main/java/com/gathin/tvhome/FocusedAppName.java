@@ -22,6 +22,7 @@ final class FocusedAppName implements PlacementTarget {
     private final SharedPreferences prefs;
     private final float density;
     private final Rect cardBounds=new Rect();
+    private final Rect artworkBounds=new Rect();
     private boolean enabled,closed;
     private float edge,targetScale,textHeight;
     private float baseX,baseY;private boolean preview;private int previewX,previewY;
@@ -73,14 +74,16 @@ final class FocusedAppName implements PlacementTarget {
         caption.setTextColor(prefs.getBoolean(AppTitleStyle.DOMINANT,false)?((AppAdapter)adapter).iconDominantAt(pos):0xF2FFFFFF);String label=((AppAdapter)adapter).labelAt(pos);if(!label.contentEquals(caption.getText()))caption.setText(label);
         // Layout coordinates deliberately exclude the zoom matrix; include the item's pivot animation separately.
         cardBounds.set(0,0,card.getWidth(),card.getHeight());root.offsetDescendantRectToMyCoords(card,cardBounds);
-        float left=cardBounds.left+item.getTranslationX()+card.getTranslationX(),top=cardBounds.top+item.getTranslationY()+card.getTranslationY();
-        int width=Math.min(Math.round(card.getWidth()*Math.max(targetScale,card.getScaleX())),Math.max(1,root.getWidth()-Math.round(16*density)));
+        AppAdapter.artBounds(card, artworkBounds);
+        float left=cardBounds.left+artworkBounds.left+item.getTranslationX()+card.getTranslationX();
+        float top=cardBounds.top+artworkBounds.top+item.getTranslationY()+card.getTranslationY();
+        int width=Math.min(Math.round(artworkBounds.width()*Math.max(targetScale,card.getScaleX())),Math.max(1,root.getWidth()-Math.round(16*density)));
         ViewGroup.LayoutParams lp=caption.getLayoutParams();int height=(int)Math.ceil(textHeight);
         if(lp.width!=width||lp.height!=height){lp.width=width;lp.height=height;caption.setLayoutParams(lp);}
-        float y=AppTitlePolicy.captionTop(top,card.getHeight(),card.getScaleY(),targetScale,edge,6*density);
+        float y=AppTitlePolicy.captionTop(top,artworkBounds.height(),card.getScaleY(),targetScale,edge,6*density);
         // A partially clipped row must not leave a detached caption over the header or another row.
         if(y<0||y+height>root.getHeight()||!item.isShown()){caption.setVisibility(View.INVISIBLE);return;}
-        baseX=AppTitlePolicy.captionLeft(left+card.getWidth()/2f,width,root.getWidth(),8*density);baseY=y;
+        baseX=AppTitlePolicy.captionLeft(left+artworkBounds.width()/2f,width,root.getWidth(),8*density);baseY=y;
         caption.setX(HeaderLayoutPolicy.clamp(preview?Math.round(previewX*density):Math.round(baseX+prefs.getInt(DX,0)*density),root.getWidth(),width));
         caption.setY(HeaderLayoutPolicy.clamp(preview?Math.round(previewY*density):Math.round(baseY+prefs.getInt(DY,0)*density),root.getHeight(),height));
         caption.setVisibility(View.VISIBLE);

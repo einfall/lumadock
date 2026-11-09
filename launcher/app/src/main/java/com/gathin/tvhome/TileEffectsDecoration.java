@@ -43,8 +43,11 @@ final class TileEffectsDecoration extends RecyclerView.ItemDecoration {
             View child=parent.getChildAt(i);int pos=parent.getChildAdapterPosition(child);
             if(!adapter.effectTileAt(pos))continue;View card=child.findViewById(R.id.card);
             if(card==null||card.getVisibility()!=View.VISIBLE)continue;boolean focused=card.isFocused()||pos==previousFocus;TileEffects current=focused?focusedEffects:effects;
-            bounds.set(0,0,card.getWidth(),card.getHeight());parent.offsetDescendantRectToMyCoords(card,bounds);
-            art.set(bounds);art.offset(child.getTranslationX()+card.getTranslationX(),child.getTranslationY()+card.getTranslationY());float radius=AppAdapter.cornerRadius(card.getWidth(),density);
+            AppAdapter.artBounds(card, bounds);
+            parent.offsetDescendantRectToMyCoords(card, bounds);
+            art.set(bounds);
+            art.offset(child.getTranslationX()+card.getTranslationX(),child.getTranslationY()+card.getTranslationY());
+            float radius = AppAdapter.cornerRadius(bounds.width(), density);
             // The view's transformation is handled here so the edge follows its focus-out animation.
             float sx=card.getScaleX(),sy=card.getScaleY();
             canvas.save();canvas.scale(sx,sy,art.centerX(),art.centerY());

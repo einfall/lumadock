@@ -78,10 +78,17 @@ final class LibraryApps {
         return true;
     }
 
+    static boolean restore(Context context, Set<String> added, Set<String> removed) {
+        return write(store(context, false), added) && write(store(context, true), removed);
+    }
+
     private static boolean write(AtomicFile file, Set<String> saved, String pkg, boolean added) {
+        return write(file, change(saved, pkg, added));
+    }
+
+    private static boolean write(AtomicFile file, Set<String> next) {
         FileOutputStream output = null;
         try {
-            Set<String> next = change(saved, pkg, added);
             byte[] bytes = encode(next).getBytes(StandardCharsets.UTF_8);
             output = file.startWrite();
             output.write(bytes);

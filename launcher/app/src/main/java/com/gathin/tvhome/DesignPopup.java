@@ -17,13 +17,27 @@ final class DesignPopup {
     private void changed(android.content.SharedPreferences.Editor e){e.putLong(Config.SETTINGS_REVISION_KEY,prefs.getLong(Config.SETTINGS_REVISION_KEY,0)+1).apply();applied.run();}
     private void system(){SettingsSheet p=new SettingsSheet(a,s(R.string.menu_system));if(a instanceof MainActivity)p.row("tune","Launcher-Verhalten","Animationen, Theme und Start-App",()->LauncherBehaviorPopup.show((MainActivity)a));p.row("settings",s(R.string.launcher_settings),s(R.string.menu_launcher_hint),()->a.startActivity(new Intent(a,HomeSettingsActivity.class)));p.row("settings",s(R.string.menu_android),s(R.string.menu_android_hint),()->{try{a.startActivity(SystemSettings.intent(a,android.provider.Settings.ACTION_SETTINGS));}catch(android.content.ActivityNotFoundException ignored){Toast.makeText(a,R.string.not_available,Toast.LENGTH_SHORT).show();}});p.show();}
     private void apps(){AppAppearance apps=new AppAppearance(a,Config.load(a));AppManagerPopup.show(a,apps,()->{Config cfg=Config.load(a);if(!apps.saveOrder(prefs.getInt("dock_columns",cfg.columns))){Toast.makeText(a,R.string.apps_save_failed,Toast.LENGTH_SHORT).show();return;}android.content.SharedPreferences.Editor e=prefs.edit();apps.save(e);changed(e);});}
-    private void layout(){Config cfg=Config.load(a);SettingsSheet p=new SettingsSheet(a,s(R.string.menu_layout));p.info(s(R.string.menu_slider_hint));p.group(s(R.string.menu_dock));p.add(new GridSlider(a,s(R.string.design_dock_columns),4,7,prefs.getInt("dock_columns",cfg.columns),n->changed(prefs.edit().putInt("dock_columns",n))));p.group(s(R.string.menu_grid));p.add(new GridSlider(a,s(R.string.design_grid_columns),4,7,cfg.columns,n->changed(prefs.edit().putInt("columns",n))));p.add(new GridSlider(a,s(R.string.design_rows),0,3,cfg.rowsBelowDock,n->changed(prefs.edit().putInt(Config.ROWS_BELOW_DOCK_KEY,n))));p.info(s(R.string.dock_rows_hint));p.group(s(R.string.menu_dock));
+    private void layout(){Config cfg=Config.load(a);SettingsSheet p=new SettingsSheet(a,s(R.string.menu_layout));p.info(s(R.string.menu_slider_hint));p.group(s(R.string.menu_dock));p.add(new GridSlider(a,s(R.string.design_dock_columns),4,7,prefs.getInt("dock_columns",cfg.columns),n->changed(prefs.edit().putInt("dock_columns",n))));p.group(s(R.string.menu_grid));p.add(new GridSlider(a,s(R.string.design_grid_columns),4,7,cfg.columns,n->changed(prefs.edit().putInt("columns",n))));p.add(new GridSlider(a,s(R.string.design_rows),0,3,cfg.rowsBelowDock,n->changed(prefs.edit().putInt(Config.ROWS_BELOW_DOCK_KEY,n))));p.info(s(R.string.dock_rows_hint));
+        p.group("Positionieren");
+        p.toggle("Hilfslinien", "Bildschirmmitte, Kanten und sichtbare Elemente",
+                prefs.getBoolean(PlacementGuides.SHOW, true),
+                on -> prefs.edit().putBoolean(PlacementGuides.SHOW, on).apply());
+        p.toggle("Einrasten", "Dock, Widgets und Texte beim Verschieben ausrichten",
+                prefs.getBoolean(PlacementGuides.SNAP, false),
+                on -> prefs.edit().putBoolean(PlacementGuides.SNAP, on).apply());
+        p.group(s(R.string.menu_dock));
         String[] sortIds={"custom","name","installed","frequent"};p.options("move",s(R.string.dock_sort),java.util.Arrays.stream(sortIds).map(this::sortName).toArray(String[]::new),i->sortIds[i].equals(DockPolicy.mode(prefs.getString("dock_sort","custom"))),i->changed(prefs.edit().putString("dock_sort",sortIds[i])));
         p.toggle(s(R.string.dock_only),s(R.string.dock_only_hint),cfg.singleRow,on->changed(prefs.edit().putBoolean("dock_only",on)));
         DockBrowsePopup.append(a,applied,p);
         DockPlacementPopup.append(a,p,applied);
         p.toggle(s(R.string.dock_wrap),s(R.string.dock_wrap_hint),prefs.getBoolean("dock_wrap",false),on->changed(prefs.edit().putBoolean("dock_wrap",on)));
-        p.toggle(s(R.string.dock_counter),s(R.string.dock_counter_hint),prefs.getBoolean("dock_counter",false),on->changed(prefs.edit().putBoolean("dock_counter",on)));DockStylePopup.append(a,()->{if(a instanceof MainActivity)((MainActivity)a).refreshDockStyle();},p);p.show();}
+        p.toggle(s(R.string.dock_counter),s(R.string.dock_counter_hint),prefs.getBoolean("dock_counter",false),on->changed(prefs.edit().putBoolean("dock_counter",on)));
+        if (a instanceof MainActivity) {
+            MainActivity home = (MainActivity) a;
+            p.row("move", s(R.string.dock_counter_move), s(R.string.dock_counter_move_hint), home::moveDockCounter);
+            p.row("refresh", s(R.string.dock_counter_reset), null, home::resetDockCounter);
+        }
+        DockStylePopup.append(a,()->{if(a instanceof MainActivity)((MainActivity)a).refreshDockStyle();},p);p.show();}
     private String sortName(String id){switch(DockPolicy.mode(id)){case "name":return s(R.string.dock_sort_name);case "installed":return s(R.string.dock_sort_installed);case "frequent":return s(R.string.dock_sort_frequent);default:return s(R.string.dock_sort_custom);}}
     private void sort(){SettingsSheet p=new SettingsSheet(a,s(R.string.dock_sort));for(String id:new String[]{"custom","name","installed","frequent"}){p.choice("move",sortName(id),null,()->id.equals(DockPolicy.mode(prefs.getString("dock_sort","custom"))),()->changed(prefs.edit().putString("dock_sort",id)));}p.info(s(R.string.dock_sort_hint));p.show();}
     private void focus(){SettingsSheet p=new SettingsSheet(a,s(R.string.focus_title));p.row("move",s(R.string.motion_title),s(R.string.menu_motion_hint),()->FocusMotionPopup.show(a,applied));p.row("grid",s(R.string.effects_idle_title),s(R.string.menu_idle_hint),()->TileEffectsPopup.show(a,false,applied));p.show();}

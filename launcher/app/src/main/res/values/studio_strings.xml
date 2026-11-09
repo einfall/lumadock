@@ -1,7 +1,16 @@
 <resources>
     <string name="title_style">App-Name · Größe &amp; Position</string>
     <string name="title_position">App-Name anzeigen</string>
-    <string name="title_position_hero">Bisherige Position</string>
+    <string name="title_position_hero">Über dem Dock</string>
+    <string name="title_alignment">Ausrichtung über dem Dock</string>
+    <string name="title_align_left">Links</string>
+    <string name="title_align_center">Mittig</string>
+    <string name="title_align_right">Rechts</string>
+    <string name="title_align_manual">Manuell</string>
+    <string name="title_transition">Textwechsel über dem Dock</string>
+    <string name="title_transition_slide">Schieben</string>
+    <string name="title_transition_fade">Sanft ein- und ausblenden</string>
+    <string name="title_transition_none">Sofort</string>
     <string name="title_position_focus">Unter fokussierter App</string>
     <string name="title_position_hint">Unter der App: nur der aktive Name, mittig unter Kachel und Fokusrahmen. Schrift und Kachel-Beschriftungsgröße gelten weiterhin. Freies Verschieben gilt auch unter der fokussierten App; der gewählte Abstand wandert mit dem Fokus mit.</string>
     <string name="title_style_hint">Großer Titel, Kachel-Beschriftung und freie Platzierung</string>

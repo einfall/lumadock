@@ -27,6 +27,20 @@ final class AppGlyph extends Drawable {
             case "cpu":c.drawRoundRect(6,6,18,18,2,2,p);c.drawRect(9,9,15,15,p);for(int k=8;k<=16;k+=4){c.drawLine(k,2,k,6,p);c.drawLine(k,18,k,22,p);c.drawLine(2,k,6,k,p);c.drawLine(18,k,22,k,p);}break;
             case "memory":c.drawRoundRect(2,5,22,18,2,2,p);for(int k=5;k<21;k+=5){c.drawRect(k,8,k+2,14,p);c.drawLine(k,18,k,21,p);}break;
             case "storage":c.drawRoundRect(3,2,21,22,3,3,p);c.drawCircle(12,11,5,p);c.drawLine(12,11,17,16,p);c.drawPoint(7,19,p);break;
+            case "folder":
+                path.moveTo(2, 7);
+                path.quadTo(2, 5, 4, 5);
+                path.lineTo(9, 5);
+                path.lineTo(12, 8);
+                path.lineTo(20, 8);
+                path.quadTo(22, 8, 22, 10);
+                path.lineTo(22, 18);
+                path.quadTo(22, 20, 20, 20);
+                path.lineTo(4, 20);
+                path.quadTo(2, 20, 2, 18);
+                path.close();
+                c.drawPath(path, p);
+                break;
             case "grid":for(int y=0;y<3;y++)for(int x=0;x<3;x++)c.drawRoundRect(3+x*7,3+y*7,7+x*7,7+y*7,1,1,p);break;
             case "tune":case "settings":for(int i=0;i<3;i++){float y=5+i*7;c.drawLine(2,y,22,y,p);c.drawCircle(i==1?15:8,y,2,p);}break;
             case "cloud":path.moveTo(6,19);path.cubicTo(-1,19,0,9,7,10);path.cubicTo(9,1,21,4,19,11);path.cubicTo(26,12,24,19,18,19);path.close();c.drawPath(path,p);break;
@@ -38,6 +52,19 @@ final class AppGlyph extends Drawable {
             case "lock":case "unlock":
                 c.drawRoundRect(5,10,19,21,2,2,p);c.drawArc(new RectF(8,2,16,15),180,kind.equals("lock")?180:100,false,p);c.drawLine(12,14,12,17,p);break;
             case "move":for(int i=0;i<3;i++)c.drawLine(5,7+5*i,19,7+5*i,p);break;
+            case "play":
+                p.setStyle(Paint.Style.FILL);
+                path.moveTo(7, 4);
+                path.lineTo(21, 12);
+                path.lineTo(7, 20);
+                path.close();
+                c.drawPath(path, p);
+                break;
+            case "pause":
+                p.setStyle(Paint.Style.FILL);
+                c.drawRoundRect(5, 4, 9, 20, 1, 1, p);
+                c.drawRoundRect(15, 4, 19, 20, 1, 1, p);
+                break;
             case "music":c.drawLine(10,5,10,17,p);c.drawLine(10,5,19,3,p);c.drawLine(19,3,19,15,p);c.drawOval(5,16,10,20,p);c.drawOval(14,14,19,18,p);break;
             case "star":for(int i=0;i<10;i++){double a=-Math.PI/2+i*Math.PI/5;float r=i%2==0?10:4.5f;float x=12+(float)Math.cos(a)*r,y=12+(float)Math.sin(a)*r;if(i==0)path.moveTo(x,y);else path.lineTo(x,y);}path.close();c.drawPath(path,p);break;
             case "game":c.drawRoundRect(2,6,22,19,5,5,p);c.drawLine(6,12,12,12,p);c.drawLine(9,9,9,15,p);c.drawCircle(17,10,1,p);c.drawCircle(19,14,1,p);break;

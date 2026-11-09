@@ -15,31 +15,129 @@ final class HomeWidgetsPopup {
         p.clearRows();
         p.group(s(R.string.widgets_instances));p.row("grid",s(R.string.widgets_add),s(R.string.widgets_sources_hint),this::sources);
         p.row("grid",s(R.string.widgets_android),a.getString(R.string.widgets_provider_count,widgets.android.providers().size()),widgets.android::choose);
-        int n=0;for(HomeWidgetStore.Spec spec:widgets.store.all()){String id=spec.id;p.row(spec.android()?"grid":WidgetSource.find(spec.source).glyph,title(spec)+" · "+(++n),s(spec.enabled?R.string.menu_on:R.string.menu_off)+" · "+("system".equals(spec.source)?HomeWidgets.metricNames(a,spec.metricsMask):HomeWidgets.sourceName(a,spec.source)),()->item(id));}
+        java.util.List<View> tiles=new java.util.ArrayList<>();
+        int n=0;
+        for(HomeWidgetStore.Spec spec:widgets.store.all()){
+            String detail=spec.temporal()?spec.timeStyle.label:spec.system()?HomeWidgets.metricNames(a,spec.metricsMask):HomeWidgets.sourceName(a,spec.source);
+            tiles.add(WidgetPreview.tile(a,preview(spec),title(spec)+" · "+(++n),
+                    s(spec.enabled?R.string.menu_on:R.string.menu_off)+" · "+detail,()->item(spec.id)));
+        }
+        grid(p,tiles);
         p.group(s(R.string.system_stats_refresh));p.add(new GridSlider(a,s(R.string.system_stats_interval),5,60,SystemStatsPolicy.seconds(prefs.getInt(SystemStatsWidget.SECONDS,10)),seconds->prefs.edit().putInt(SystemStatsWidget.SECONDS,seconds).apply()));
         p.info(s(R.string.widgets_hint));
     };render.run();SharedPreferences.OnSharedPreferenceChangeListener update=(sp,key)->{if(HomeWidgetStore.ITEMS.equals(key))p.body.post(render);};prefs.registerOnSharedPreferenceChangeListener(update);p.dialog.setOnDismissListener(d->prefs.unregisterOnSharedPreferenceChangeListener(update));p.show();}
-    private void sources(){SettingsSheet p=new SettingsSheet(a,s(R.string.widgets_sources));for(WidgetSource source:new WidgetSource[]{WidgetSource.SYSTEM,WidgetSource.QUOTE,WidgetSource.TEXT})p.row(source.glyph,HomeWidgets.sourceName(a,source.id),null,()->{HomeWidgetStore.Spec added=widgets.store.add(source.id);if(added==null){Toast.makeText(a,R.string.widgets_limit,Toast.LENGTH_LONG).show();return;}p.dialog.dismiss();item(added.id);});p.info(s(R.string.widgets_source_note));p.show();}
+    private View preview(HomeWidgetStore.Spec spec){
+        View fallback=spec.android()?widgets.android.preview(spec.appWidgetId):WidgetPreview.sample(a,spec);
+        return WidgetPreview.live(a,()->widgets.view(spec.id),fallback);
+    }
+    private void sources(){
+        SettingsSheet p=new SettingsSheet(a,s(R.string.widgets_sources));
+        java.util.List<View> clocks=timeTiles(p,WidgetSource.CLOCK);
+        timeTiles(p,WidgetSource.CALENDAR);
+        p.group("WEITERE WIDGETS");
+        java.util.List<View> others=new java.util.ArrayList<>();
+        WidgetSource[] sources={WidgetSource.SYSTEM,WidgetSource.QUOTE,WidgetSource.TEXT,WidgetSource.ECHO};
+        String[] descriptions={"CPU, RAM, Speicher und Netzwerk","Als Text oder Bild","Dein eigener Text","Echo-Wiedergabe über Home Assistant"};
+        for(int i=0;i<sources.length;i++){
+            WidgetSource source=sources[i];
+            HomeWidgetStore.Spec existing=source==WidgetSource.SYSTEM?widgets.store.system():null;
+            HomeWidgetStore.Spec example=new HomeWidgetStore.Spec("",source.id);
+            if(example.system()){example.width=320;example.metricsStyle="resources";}
+            View view=existing==null?WidgetPreview.sample(a,example):preview(existing);
+            others.add(WidgetPreview.tile(a,view,HomeWidgets.sourceName(a,source.id),
+                    existing==null?descriptions[i]:"Vorhandenes Widget bearbeiten",()->{
+                if(existing==null)add(p,source,null);
+                else {p.dialog.dismiss();item(existing.id);}
+            }));
+        }
+        grid(p,others);
+        p.info(s(R.string.widgets_source_note));
+        p.show();
+        clocks.get(0).requestFocus();
+    }
+    private java.util.List<View> timeTiles(SettingsSheet p,WidgetSource source){
+        p.group(HomeWidgets.sourceName(a,source.id).toUpperCase(java.util.Locale.ROOT));
+        java.util.List<View> tiles=new java.util.ArrayList<>();
+        for(TimeWidgetStyle style:TimeWidgetStyle.forSource(source==WidgetSource.CALENDAR)){
+            HomeWidgetStore.Spec sample=new HomeWidgetStore.Spec("",source.id);
+            sample.timeStyle=style;
+            tiles.add(WidgetPreview.tile(a,WidgetPreview.sample(a,sample),style.label,style.detail,()->add(p,source,style)));
+        }
+        grid(p,tiles);
+        return tiles;
+    }
+    private void add(SettingsSheet p,WidgetSource source,TimeWidgetStyle style){
+        HomeWidgetStore.Spec added=widgets.store.add(source.id,style);
+        if(added==null){Toast.makeText(a,R.string.widgets_limit,Toast.LENGTH_LONG).show();return;}
+        p.dialog.dismiss();
+        item(added.id);
+    }
+    private void grid(SettingsSheet p,java.util.List<View> tiles){
+        for(int i=0;i<tiles.size();i+=2){
+            LinearLayout row=new LinearLayout(a);
+            row.setBaselineAligned(false);
+            LinearLayout.LayoutParams left=new LinearLayout.LayoutParams(0,-2,1);
+            left.setMarginEnd(SettingsSheet.dp(a,3));
+            row.addView(tiles.get(i),left);
+            row.addView(i+1<tiles.size()?tiles.get(i+1):new View(a),new LinearLayout.LayoutParams(0,-2,1));
+            p.add(row);
+        }
+    }
     private void item(String id){HomeWidgetStore.Spec spec=widgets.spec(id);if(spec==null||widgets.view(id)==null)return;SettingsSheet p=new SettingsSheet(a,title(spec));final GridSlider[] heightControl=new GridSlider[1];
+        p.preview(preview(spec),88);
         if(spec.quote())quoteOptions(p,id);if(spec.text())textOptions(p,id);
-        if("system".equals(spec.source)){
+        if(spec.temporal()){
+            TimeWidgetStyle[] styles=TimeWidgetStyle.forSource(spec.calendar());
+            String[] names=java.util.Arrays.stream(styles).map(style->style.label).toArray(String[]::new);
+            p.options("timer","Darstellung",names,i->widgets.spec(id).timeStyle==styles[i],
+                    i->widgets.store.edit(id,w->w.timeStyle=styles[i]));
+        }
+        if (spec.echo()) {
+            EchoLayout[] layouts = EchoLayout.values();
+            String[] names = java.util.Arrays.stream(layouts).map(layout -> layout.label).toArray(String[]::new);
+            p.options("grid", "Wiedergabe-Layout", names, i -> widgets.spec(id).echoLayout == layouts[i],
+                    i -> widgets.store.edit(id, widget -> {
+                        EchoLayout chosen = layouts[i];
+                        widget.echoLayout = chosen;
+                        if (chosen != EchoLayout.AUTO) {
+                            widget.width = Math.min(chosen.width, widgets.width());
+                            widget.height = Math.min(chosen.height, widgets.height());
+                        }
+                    }));
+            p.info("Automatisch wählt das Layout passend zu Breite und Höhe.");
+            p.row("music", "Mediaplayer wechseln", "Geräte mit dem gespeicherten Zugang auswählen",
+                    () -> EchoSetup.switchPlayer(a, widgets.echo));
+            p.row("network", "Home Assistant verbinden", "Adresse und Zugriffstoken einrichten oder ändern",
+                    () -> EchoSetup.show(a, widgets.echo));
+            p.row("refresh", "Wiedergabe aktualisieren", null, widgets.echo::refresh);
+            p.row("eye_off", "Home Assistant trennen", null,
+                    () -> DesignDialogs.confirm(a, "Home Assistant trennen", "Die gespeicherte Verbindung entfernen?",
+                            "Trennen", () -> { widgets.echo.settings.clear(); widgets.echo.refresh(); }));
+            p.info("Das Widget liest den Status des Mediaplayers und zeigt ein Cover, wenn Home Assistant es bereitstellt.");
+        }
+        if(spec.system()){
             p.options("cpu","Messwerte",new String[]{"CPU","RAM","Speicher","Netzwerk"},i->(widgets.spec(id).metricsMask&(1<<i))!=0,i->widgets.metrics(id,widgets.spec(id).metricsMask^(1<<i)),true);
-            boolean group="system".equals(spec.source);String[] ids=group?SystemInfoStyle.IDS:new String[]{"original","ring_neon","ring_donut"};String[] names=group?SystemInfoStyle.NAMES:new String[]{"Bisherige Ansicht","Ring · Leuchtend","Ring · Donut"};
-            p.options("cpu",group?"Systeminformationen · Layout":"Widget · Darstellung",names,i->ids[i].equals(widgets.spec(id).metricsStyle),i->widgets.metricsStyle(id,ids[i]));
-            if(group){p.options("grid","Ringe · Anordnung",new String[]{"Untereinander","Nebeneinander"},i->(i==1)=="horizontal".equals(widgets.spec(id).ringAxis),i->widgets.ringAxis(id,i==1?"horizontal":"vertical"));p.add(new GridSlider(a,"Ringe · Abstand (dp)",0,32,spec.ringGap,n->widgets.ringGap(id,n)));}
+            p.options("cpu","Systeminformationen · Layout",SystemInfoStyle.NAMES,i->SystemInfoStyle.IDS[i].equals(widgets.spec(id).metricsStyle),i->widgets.metricsStyle(id,SystemInfoStyle.IDS[i]));
+            p.options("grid","Ringe · Anordnung",new String[]{"Untereinander","Nebeneinander"},i->(i==1)=="horizontal".equals(widgets.spec(id).ringAxis),i->widgets.ringAxis(id,i==1?"horizontal":"vertical"));
+            p.add(new GridSlider(a,"Ringe · Abstand (dp)",0,32,spec.ringGap,n->widgets.ringGap(id,n)));
             p.add(new GridSlider(a,"Ringe · Leuchten (%)",0,100,spec.ringGlow,n->widgets.store.edit(id,w->w.ringGlow=n)));p.add(new GridSlider(a,"Ringe · Linien-Deckkraft (%)",0,100,spec.ringOpacity,n->widgets.store.edit(id,w->w.ringOpacity=n)));
-            p.info("Ringe zeigen CPU-, RAM- und Speicherbelegung in Prozent. Einzelne Ring-Widgets lassen sich frei untereinander positionieren.");
-            p.options("photo",group?"Systeminformationen · Oberfläche":"Widget · Oberfläche",new String[]{"Glas · Transparent","Hell · Bisheriger Stil"},i->(i==0)==widgets.spec(id).metricsGlass,i->widgets.metricsGlass(id,i==0));
+            p.info("Ringe zeigen CPU-, RAM- und Speicherbelegung in Prozent. Die Anordnung gilt für alle sichtbaren Ringe.");
+            p.options("photo","Systeminformationen · Oberfläche",new String[]{"Glas · Transparent","Hell · Bisheriger Stil"},i->(i==0)==widgets.spec(id).metricsGlass,i->widgets.metricsGlass(id,i==0));
             p.add(new GridSlider(a,"Glas · Deckkraft (%)",0,90,spec.metricsOpacity,n->widgets.metricsOpacity(id,n)));
             p.info("Alle Messwerte gehören zu diesem Widget. Ohne ausgewählte Werte ist es ausgeblendet. Netzwerk zeigt LAN + WLAN zusammen in MB/s.");
-            if(group)p.info("Netzwerkraten sind Mittelwerte über das Aktualisierungsintervall. Tunnel und Loopback werden nicht doppelt gezählt.");
+            p.info("Netzwerkraten sind Mittelwerte über das Aktualisierungsintervall. Tunnel und Loopback werden nicht doppelt gezählt.");
         }
         LinearLayout shown=p.toggle(s(R.string.header_show),null,spec.enabled,on->widgets.show(id,on));
         p.row("move",s(R.string.header_move),s(R.string.header_move_hint),()->HeaderMoveOverlay.show(a,widgets,id,title(spec),()->{}));
         LinearLayout theme=spec.quote()||spec.text()?null:p.row("photo",s(R.string.widgets_theme),SurfaceThemePopup.name(a,spec.theme),()->SurfaceThemePopup.choose(a,s(R.string.widgets_theme),widgets.spec(id).theme,true,choice->widgets.theme(id,choice)));
-        p.add(new GridSlider(a,s(R.string.widgets_width),spec.android()?Math.min(widgets.width(),widgets.android.minWidth(spec.appWidgetId)):spec.quote()?240:64,spec.android()?widgets.width():Math.min(480,widgets.width()),spec.width,n->{HomeWidgetStore.Spec now=widgets.spec(id);if(now!=null)widgets.resize(id,n,now.android()||now.quote()||now.text()?now.height:now.metricsHeight);}));
-        if(spec.quote()||spec.text())p.add(new GridSlider(a,s(R.string.widgets_height),spec.text()?24:80,Math.min(500,widgets.height()),spec.height,n->{HomeWidgetStore.Spec now=widgets.spec(id);if(now!=null)widgets.resize(id,now.width,n);}));
-        if(!spec.android()&&!spec.quote()&&!spec.text()){
+        GridSlider widthControl=new GridSlider(a,s(R.string.widgets_width),spec.android()?Math.min(widgets.width(),widgets.android.minWidth(spec.appWidgetId)):spec.quote()?240:spec.echo()?160:64,spec.android()?widgets.width():Math.min(480,widgets.width()),spec.width,n->{HomeWidgetStore.Spec now=widgets.spec(id);if(now!=null)widgets.resize(id,n,now.fixedHeight()?now.height:now.metricsHeight);});
+        p.add(widthControl);
+        if(spec.fixedHeight()&&!spec.android()){
+            GridSlider height=new GridSlider(a,s(R.string.widgets_height),spec.text()?24:spec.echo()?68:80,Math.min(500,widgets.height()),spec.height,n->{HomeWidgetStore.Spec now=widgets.spec(id);if(now!=null)widgets.resize(id,now.width,n);});
+            if(spec.echo())heightControl[0]=height;
+            p.add(height);
+        }
+        if(!spec.fixedHeight()){
             int[] actual=widgets.size(id);int minimum=SystemWidgetPolicy.minimum(spec.source,spec.metricsStyle,((HomeWidgetCard)widgets.view(id)).mask);
             GridSlider height=new GridSlider(a,s(R.string.widgets_height),Math.min(minimum,widgets.height()),widgets.height(),spec.metricsHeight>0?spec.metricsHeight:actual[1],n->{HomeWidgetStore.Spec now=widgets.spec(id);if(now!=null)widgets.resize(id,now.width,n);}).maxFrom(widgets::height).minFrom(()->{HomeWidgetStore.Spec now=widgets.spec(id);return now==null?32:Math.min(widgets.height(),SystemWidgetPolicy.minimum(now.source,now.metricsStyle,((HomeWidgetCard)widgets.view(id)).mask));});heightControl[0]=height;p.add(height);
             p.row("settings","Widget-Höhe automatisch", "Stellt die passende Höhe für Layout und sichtbare Werte wieder her",()->{widgets.automaticHeight(id);p.body.postDelayed(()->height.syncValue(widgets.size(id)[1]),100);});
@@ -50,7 +148,7 @@ final class HomeWidgetsPopup {
         GridSlider y=new GridSlider(a,s(R.string.header_y),0,Math.max(0,widgets.height()-size[1]),point[1],n->{HomeWidgetStore.Spec now=widgets.spec(id);if(now!=null)widgets.set(id,now.x,n);}).maxFrom(()->Math.max(0,widgets.height()-widgets.size(id)[1]));p.add(y);
         if(!HomeWidgetStore.SUMMARY.equals(id)){p.row("tune",s(R.string.widgets_name),title(spec),()->rename(id));p.row("eye_off",s(R.string.widgets_remove),s(R.string.widgets_remove_hint),()->{widgets.remove(id);p.dialog.dismiss();});}
         p.info(s(R.string.widgets_units));
-        SharedPreferences.OnSharedPreferenceChangeListener update=(sp,key)->{if(key!=null&&(key.startsWith(HomeWidgetStore.P)||key.startsWith("system_stats_")))p.body.postDelayed(()->{HomeWidgetStore.Spec now=widgets.spec(id);if(now==null||widgets.view(id)==null)return;int[] position=widgets.position(id);x.syncValue(position[0]);y.syncValue(position[1]);if(heightControl[0]!=null&&!heightControl[0].hasFocus())heightControl[0].syncValue(widgets.size(id)[1]);SettingsSheet.syncToggle(shown,now.enabled);if(theme!=null)subtitle(theme,SurfaceThemePopup.name(a,now.theme));},50);};prefs.registerOnSharedPreferenceChangeListener(update);p.dialog.setOnDismissListener(d->prefs.unregisterOnSharedPreferenceChangeListener(update));p.show();}
+        SharedPreferences.OnSharedPreferenceChangeListener update=(sp,key)->{if(key!=null&&(key.startsWith(HomeWidgetStore.P)||key.startsWith("system_stats_")))p.body.postDelayed(()->{HomeWidgetStore.Spec now=widgets.spec(id);if(now==null||widgets.view(id)==null)return;int[] position=widgets.position(id);x.syncValue(position[0]);y.syncValue(position[1]);if(now.echo()&&!widthControl.hasFocus())widthControl.syncValue(now.width);if(heightControl[0]!=null&&!heightControl[0].hasFocus())heightControl[0].syncValue(now.echo()?now.height:widgets.size(id)[1]);SettingsSheet.syncToggle(shown,now.enabled);if(theme!=null)subtitle(theme,SurfaceThemePopup.name(a,now.theme));},50);};prefs.registerOnSharedPreferenceChangeListener(update);p.dialog.setOnDismissListener(d->prefs.unregisterOnSharedPreferenceChangeListener(update));p.show();}
     private void textOptions(SettingsSheet p,String id){
         p.row("text","Text bearbeiten",widgets.spec(id).textContent,()->editText(id));
         java.util.List<String> fonts=new java.util.ArrayList<>();for(String font:FontPolicy.IDS)if(FontPolicy.forAppNames(font))fonts.add(font);

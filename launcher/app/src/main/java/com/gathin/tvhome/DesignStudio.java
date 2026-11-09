@@ -40,6 +40,9 @@ final class DesignStudio {
         listRow(list,"photo","Hintergrund","Verläufe, Bilder, Live-Hintergründe und Wechsel",()->wallpaperPage("Verläufe"));
         listRow(list,"grid","Geöffnete Apps","Langes Zurück, einzelne Apps oder alle schließen",()->RecentAppsSettings.show(a));
         listRow(list,"grid","Apps verwalten","Sichtbarkeit, Reihenfolge und PIN",()->DesignPopup.openCategory(a,changed,"apps"));
+        listRow(list,"settings","Profile & Sicherung","Layouts wechseln, sichern und übertragen",
+                () -> { if (a instanceof MainActivity) DesignProfilesPopup.show((MainActivity) a); });
+        listRow(list,"folder","Dock-Ordner","Apps im Dock gruppieren",() -> DockFolderSettings.show(a, changed));
         listRow(list,"dock","Layout & Dock","Raster, Navigation und Material",()->DesignPopup.openLayout(a,changed));
         listRow(list,"star","Fokus & Effekte","Rahmen, Glanz, Zoom und Mehrfachauswahl",()->FocusMotionPopup.show(a,changed));
         listRow(list,"tune","Schriften & Icons","Schriftfamilien, App-Namen und Icon-Packs",()->TypographyPopup.show(a,changed));
