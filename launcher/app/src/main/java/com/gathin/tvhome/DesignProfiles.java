@@ -152,6 +152,15 @@ final class DesignProfiles {
         transact(id, current, target, null);
     }
 
+    void restoreTransfer(JSONObject incoming) throws IOException, JSONException {
+        recover();
+        JSONObject current = DesignSnapshot.captureTransfer(context);
+        String id = active();
+        JSONObject target = DesignSnapshot.forTransferImport(context, incoming, current);
+        saveUndo(id, current);
+        transact(id, current, target, null);
+    }
+
     boolean hasUndo() {
         try {
             return active().equals(read(undo, DesignSnapshot.MAX_BYTES + 4096).getString("active"));
@@ -165,8 +174,9 @@ final class DesignProfiles {
         String id = active();
         JSONObject previous = read(undo, DesignSnapshot.MAX_BYTES + 4096);
         if (!id.equals(previous.getString("active"))) throw new IOException("Sicherung gehört zu einem anderen Profil.");
-        JSONObject current = DesignSnapshot.capture(context);
         JSONObject target = DesignSnapshot.decode(previous.getJSONObject("layout").toString());
+        JSONObject current = target.has("transfer")
+                ? DesignSnapshot.captureTransfer(context) : DesignSnapshot.capture(context);
         transact(id, current, target, null);
         undo.delete();
     }

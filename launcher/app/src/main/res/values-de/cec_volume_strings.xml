@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="cec_volume_enable">HDMI-CEC-Lautstärke anzeigen</string>
+    <string name="cec_volume_enable">Soundbar-Lautstärke anzeigen</string>
     <string name="cec_volume_source">HDMI · CEC</string>
     <string name="cec_volume_muted">Stumm · %1$d</string>
     <string name="cec_volume_waiting">Warte auf CEC</string>
     <string name="cec_volume_unavailable">Kein CEC-Wert</string>
     <string name="cec_volume_authorize">ADB am TV erlauben</string>
+    <string name="sonos_volume_waiting">Sonos-Lautstärke wird gelesen</string>
+    <string name="sonos_volume_unavailable">Sonos nicht erreichbar</string>
+    <string name="sonos_volume_no_device">Sonos-Gerät auswählen</string>
 </resources>

@@ -27,15 +27,24 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 - Glas- und Farb-Themes für Dock, Buttons und Widgets; direkte Vorschau in der Einstellungen-Liste.
 - Fotos, Verläufe und stumme Live-Hintergründe, Favoriten per langem OK und kombinierbare Wechselregeln.
 - Frei platzierbare Uhr, Datum und Wetter. Eigene Widgets mit Vorschaukacheln, vier Digitaluhr-Stilen, Monats- und Wochenkalender sowie Android-Widgets.
+- Designprofile mit Sicherung und verschlüsselter Übertragung des aktiven Layouts im Heimnetz.
 - Echo-Wiedergabe über Home Assistant mit Geräteauswahl, Titel, Cover und Fortschritt.
 - Eigener Begrüßungstext als frei gestaltbares Textwidget; Uhrzeit/Datum wahlweise zweizeilig.
 - Systeminformationen mit wählbaren Messwerten, Ring-Themes und getrennten Deckkraft-Reglern für Linie und Leuchten.
 - Geöffnete Apps per langem Zurück, große App-Kacheln und einzelnes/gesammeltes Schließen über autorisierte lokale ADB.
 - Spruch-Widget als Text/Bild, Schriftvorschau und Pixel-Ein-/Ausflug mit Ebenen vor/hinter dem Dock.
 - PIN-Schutz einzelner App-Starts im Launcher, Ausblenden und Verschieben per langem OK.
-- Bildschirmschoner, Sleeptimer mit Countdown und optionale HDMI-CEC-Lautstärkeanzeige.
+- Bildschirmschoner, Sleeptimer mit Countdown und optionale Lautstärkeanzeige über HDMI-CEC oder ein ausgewähltes Sonos-Gerät im Heimnetz.
 - **Info** mit Version, täglicher Update-Prüfung, optionalem Download und geprüftem Android-Installer.
 
-## Beta
+## Download
 
-[Version 1.1.8 Beta](https://github.com/einfall/lumadock/releases/tag/v1.1.8) ist als APK zur manuellen Installation verfügbar. Der automatische Update-Kanal verwendet stabile Releases.
+[Version 1.2.0 herunterladen](https://github.com/einfall/lumadock/releases/tag/v1.2.0). Die signierte APK kann ab Android 8.0 installiert werden. Bestehende Installationen mit derselben Signatur können über **Info** aktualisiert werden.
+
+## Einrichtung auf einen zweiten TV übertragen
+
+1. Öffne am Quellgerät **Design & Apps → Profile & Sicherung → Im Heimnetz übertragen → Dieses Gerät freigeben**.
+2. Öffne am Zielgerät **Geräte suchen**, wähle die Quelle und gib den einmaligen Freigabecode ein.
+3. Bestätige **Einrichtung übernehmen**. Unter **Profile & Sicherung** kannst du die letzte Übernahme rückgängig machen.
+
+Übertragen werden die Einstellungen des aktiven Luma-Dock-Profils, einschließlich Dock, App-Reihenfolge, Ordnern, Luma-Widgets, Schriften und Hintergrundauswahl. Apps und Icon-Packs werden auf jedem TV installiert. PINs, Zugangsdaten, Berechtigungen, Android-Widget-Verknüpfungen und die Sonos-Zuordnung bleiben gerätegebunden.

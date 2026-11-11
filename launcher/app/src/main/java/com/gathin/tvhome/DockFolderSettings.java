@@ -69,6 +69,14 @@ final class DockFolderSettings {
                     save(folders);
                     editor.dialog.dismiss();
                 }));
+        editor.toggle("Glas-Kachel mit App-Icons", "Zeigt bis zu sechs Mini-Icons auf dem Dock", folder.glassTile, on -> {
+            folder.glassTile = on;
+            save(folders);
+        });
+        editor.toggle("Zentriertes App-Popup", "OK öffnet den Ordner als Raster mit großen App-Kacheln", folder.popup, on -> {
+            folder.popup = on;
+            save(folders);
+        });
         editor.group("APPS");
         AppAppearance apps = new AppAppearance(activity, Config.load(activity));
         for (AppAppearance.Item item : apps.items) {

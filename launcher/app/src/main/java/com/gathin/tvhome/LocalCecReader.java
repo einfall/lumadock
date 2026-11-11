@@ -21,6 +21,10 @@ final class LocalCecReader {
     static String readCpu() throws Exception {return readCommand(()->{},"head -n 1 /proc/stat");}
     static String readNetwork() throws Exception {return readCommand(()->{},"cat /proc/net/dev");}
     static String readRecentApps() throws Exception {String result=readCommand(()->{},"dumpsys activity recents");if(!result.contains("RECENT TASKS"))throw new IOException("Recent tasks unavailable");return result;}
+    static String sampleAppCpu() throws Exception {return readCommand(()->{},"top -b -n 2 -d 1 -o PID,%CPU");}
+    static String readAppProcesses() throws Exception {return readCommand(()->{},"ps -A -o UID,PID,NAME");}
+    static String readAppMemory() throws Exception {return readCommand(()->{},"dumpsys meminfo --oom");}
+    static String readAppStorage() throws Exception {return readCommand(()->{},"dumpsys diskstats");}
     static String stopRecentApp(String pkg) throws Exception {return readCommand(()->{},RecentAppsPolicy.stopCommand(pkg));}
     private static String readCommand(Runnable awaitingAuthorization,String command) throws Exception {
         try (Socket socket=new Socket()) {

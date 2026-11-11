@@ -11,8 +11,8 @@ android {
         applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
         minSdk 26
         targetSdk 34
-        versionCode 118
-        versionName '1.1.8'
+        versionCode 120
+        versionName '1.2.0'
     }
 
     def officialStore = providers.gradleProperty('lumaSigningStore').orElse(providers.environmentVariable('LUMA_SIGNING_STORE')).orNull

@@ -12,6 +12,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.os.PowerManager;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,7 +25,7 @@ import java.time.ZoneId;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/** Read-only, event-driven CEC overlay. System audio broadcasts trigger the read; no key filtering or CEC sending. */
+/** Read-only, event-driven volume overlay for HDMI-CEC or a selected local Sonos device. */
 final class CecVolumeOverlay {
     static final String KEY = "cec_volume_overlay";
     private final AccessibilityService service;
@@ -37,11 +39,27 @@ final class CecVolumeOverlay {
     private boolean hiding;
     private boolean reading, closed;
     private long until, since;
+    private int session;
+    private boolean sonos;
+    private SonosLan.Player player;
+    private SonosLan.Player watchedPlayer;
+    private SonosVolumeEvents sonosEvents;
+    private boolean screenOn;
+    private final SharedPreferences preferences;
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferencesChanged = (prefs, key) -> {
+        if (KEY.equals(key) || SonosSettings.sourceSetting(key)) handler.post(this::updateSonosEvents);
+    };
     private final Runnable read = this::readStatus;
     private final Runnable hide = this::hide;
     private final BroadcastReceiver volumeChanged = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            if (!service.getSharedPreferences(Config.SETTINGS_NAME, 0).getBoolean(KEY, false)) return;
+            if (Intent.ACTION_SCREEN_ON.equals(intent.getAction()) || Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                screenOn = Intent.ACTION_SCREEN_ON.equals(intent.getAction());
+                if (!screenOn) removeNow();
+                updateSonosEvents();
+                return;
+            }
+            if (!preferences.getBoolean(KEY, false)) return;
             if (intent.getIntExtra("android.media.EXTRA_VOLUME_STREAM_TYPE", 3) != 3) return;
             trigger();
         }
@@ -50,35 +68,71 @@ final class CecVolumeOverlay {
     CecVolumeOverlay(AccessibilityService service) {
         this.service = service;
         windows = service.getSystemService(WindowManager.class);
+        preferences = service.getSharedPreferences(Config.SETTINGS_NAME, Context.MODE_PRIVATE);
+        PowerManager power = service.getSystemService(PowerManager.class);
+        screenOn = power == null || power.isInteractive();
         IntentFilter changes = new IntentFilter("android.media.VOLUME_CHANGED_ACTION");
         changes.addAction("android.media.STREAM_MUTE_CHANGED_ACTION");
         changes.addAction("android.media.MASTER_MUTE_CHANGED_ACTION");
+        changes.addAction(Intent.ACTION_SCREEN_ON);
+        changes.addAction(Intent.ACTION_SCREEN_OFF);
         service.registerReceiver(volumeChanged, changes);
+        preferences.registerOnSharedPreferenceChangeListener(preferencesChanged);
+        updateSonosEvents();
     }
 
-    void trigger() {
+    private void updateSonosEvents() {
+        SonosLan.Player selected = !closed && screenOn && preferences.getBoolean(KEY, false) && SonosSettings.enabled(service)
+                ? SonosSettings.player(service) : null;
+        if (samePlayer(watchedPlayer, selected)) return;
+        if (sonosEvents != null) sonosEvents.close();
+        watchedPlayer = selected;
+        sonosEvents = selected == null ? null : new SonosVolumeEvents(selected, level -> handler.post(() -> {
+            if (closed || watchedPlayer != selected) return;
+            trigger(false);
+            if (frame != null && sonos && samePlayer(player, selected)) frame.state(level.volume, level.muted);
+        }));
+    }
+
+    void trigger() { trigger(true); }
+
+    private void trigger(boolean refresh) {
         if (closed) return;
         VolumeStyle selected=VolumeStyle.parse(service.getSharedPreferences(Config.SETTINGS_NAME,0).getString(VolumeStyle.KEY,"glass"));
-        if(panel!=null&&style!=selected)removeNow();
+        boolean useSonos = SonosSettings.enabled(service);
+        SonosLan.Player selectedPlayer = useSonos ? SonosSettings.player(service) : null;
+        if (panel != null && (style != selected || sonos != useSonos || !samePlayer(player, selectedPlayer))) removeNow();
+        sonos = useSonos;
+        player = selectedPlayer;
         if(hiding&&panel!=null){appearance++;hiding=false;panel.animate().cancel();panel.setAlpha(1f);
             panel.setTranslationX(0);panel.setTranslationY(0);panel.setScaleX(1f);panel.setScaleY(1f);}
         if (panel == null) {
             style=selected;
             since = System.currentTimeMillis();
+            session++;
             show();
         }
         until = SystemClock.uptimeMillis() + 1800;
         handler.removeCallbacks(hide);
         handler.postDelayed(hide, 2600);
-        if (!reading) {
+        if (sonos && player == null && frame != null) {
+            frame.message(R.string.sonos_volume_no_device);
+        } else if (refresh && !reading) {
             handler.removeCallbacks(read);
             handler.postDelayed(read, 140);
         }
     }
 
+    private static boolean samePlayer(SonosLan.Player first, SonosLan.Player second) {
+        if (first == null || second == null) return first == second;
+        return first.id.equals(second.id) && first.ip.equals(second.ip) && first.label.equals(second.label);
+    }
+
     private void show() {
         panel=new android.widget.FrameLayout(service);
-        frame=new VolumeOsdView(service,style);
+        frame = sonos ? new VolumeOsdView(service, style, player == null ? "Sonos" : player.label, "Sonos")
+                : new VolumeOsdView(service, style);
+        if (sonos && player != null) frame.message(R.string.sonos_volume_waiting);
         panel.addView(frame,new android.widget.FrameLayout.LayoutParams(-1,-1));
         WindowManager.LayoutParams lp=new WindowManager.LayoutParams(dp(style.width),dp(style.height),
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
@@ -101,15 +155,20 @@ final class CecVolumeOverlay {
     }
 
     private void readStatus() {
-        if (closed || panel == null || reading) return;
+        if (closed || panel == null || reading || (sonos && player == null)) return;
+        if (sonos) {
+            readSonos();
+            return;
+        }
         reading = true;
         final long requestSince = since;
+        final int requestSession = session;
         worker.execute(() -> {
             CecAudioStatus status = null;
             boolean authorizationNeeded = false;
             try {
                 String dump = LocalCecReader.read(() -> handler.post(() -> {
-                    if (!closed && panel != null) frame.message(R.string.cec_volume_authorize);
+                    if (!closed && panel != null && requestSession == session) frame.message(R.string.cec_volume_authorize);
                 }));
                 status = CecAudioStatus.latest(dump, System.currentTimeMillis(), requestSince, ZoneId.systemDefault());
             } catch (LocalCecReader.AuthorizationNeeded e) { authorizationNeeded = true; }
@@ -120,10 +179,30 @@ final class CecVolumeOverlay {
                 reading = false;
                 if (closed || panel == null) return;
                 // A new display session cannot reuse a response from the previous one.
-                if (requestSince != since) { handler.post(read); return; }
+                if (requestSession != session) { handler.post(read); return; }
                 if(result!=null)frame.state(result.volume,result.muted);
                 else frame.message(needsAuthorization?R.string.cec_volume_authorize:SystemClock.uptimeMillis()>=until?R.string.cec_volume_unavailable:R.string.cec_volume_waiting);
                 if (!needsAuthorization && SystemClock.uptimeMillis() < until) handler.postDelayed(read, 250);
+            });
+        });
+    }
+
+    private void readSonos() {
+        reading = true;
+        SonosLan.Player selected = player;
+        int requestSession = session;
+        worker.execute(() -> {
+            SonosLan.Level reading;
+            try { reading = SonosLan.read(selected); }
+            catch (Exception unavailable) { reading = null; }
+            SonosLan.Level level = reading;
+            handler.post(() -> {
+                this.reading = false;
+                if (closed || panel == null) return;
+                if (requestSession != session) { handler.post(read); return; }
+                if (level != null) frame.state(level.volume, level.muted);
+                else frame.message(SystemClock.uptimeMillis() < until ? R.string.sonos_volume_waiting : R.string.sonos_volume_unavailable);
+                if (SystemClock.uptimeMillis() < until) handler.postDelayed(read, 450);
             });
         });
     }
@@ -150,7 +229,10 @@ final class CecVolumeOverlay {
     }
 
     void close() {
-        closed = true; service.unregisterReceiver(volumeChanged);
+        closed = true;
+        preferences.unregisterOnSharedPreferenceChangeListener(preferencesChanged);
+        updateSonosEvents();
+        service.unregisterReceiver(volumeChanged);
         handler.removeCallbacksAndMessages(null); removeNow(); worker.shutdownNow();
     }
     private int dp(int value) { return Math.round(value * service.getResources().getDisplayMetrics().density); }

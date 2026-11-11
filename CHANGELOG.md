@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-11-11
+
+- Copy the active Luma Dock setup between TVs on the same home network. Device discovery, an expiring one-time code and TLS protect the transfer. Review the incoming setup before applying it and undo the last import from Profiles & Backup.
+- Add optional Sonos discovery, selection, volume display and controls for devices on the home network. Live volume events support a soundbar connected to a different HDMI device.
+- Add per-app resource usage when Android reports it, a rounded recent-app panel with an icon-colored focus frame, and a glass dock folder with app previews and an optional popup.
+- Passed 518 unit tests and Android lint. Verified LAN discovery, import and undo between a Philips Android TV and NVIDIA Shield.
+
 ## 1.1.8 Beta — 2026-11-09
 
 - Add a visual widget catalog and previews for configured widgets. Built-in time widgets include Arc Clock, Arc Hours Clock, Calendar Clock, Departure Clock, and month and week calendars.

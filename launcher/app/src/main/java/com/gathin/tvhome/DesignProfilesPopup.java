@@ -39,6 +39,8 @@ final class DesignProfilesPopup {
 
     private void render() {
         sheet.clearRows();
+        sheet.row("network", "Im Heimnetz übertragen", "Luma Dock auf einem anderen TV finden und Einrichtung kopieren",
+                () -> LayoutTransferPopup.show(activity));
         sheet.group("PROFILE");
         try {
             List<DesignProfiles.Profile> items = profiles.list();

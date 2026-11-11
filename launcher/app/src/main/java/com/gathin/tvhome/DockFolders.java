@@ -21,6 +21,8 @@ final class DockFolders {
     static final class Folder {
         final String id;
         String name;
+        boolean glassTile;
+        boolean popup;
         final Set<String> packages = new LinkedHashSet<>();
 
         Folder(String id, String name) {
@@ -57,6 +59,8 @@ final class DockFolders {
                 object.put("id", folder.id);
                 object.put("name", folder.name);
                 object.put("apps", new JSONArray(folder.packages));
+                object.put("glassTile", folder.glassTile);
+                object.put("popup", folder.popup);
             } catch (JSONException impossible) {
                 throw new IllegalArgumentException(impossible);
             }
@@ -79,6 +83,8 @@ final class DockFolders {
                 throw new JSONException("Invalid folder");
             }
             Folder folder = new Folder(id, name);
+            folder.glassTile = object.optBoolean("glassTile");
+            folder.popup = object.optBoolean("popup");
             JSONArray apps = object.getJSONArray("apps");
             if (apps.length() > 300) throw new JSONException("Too many folder apps");
             for (int j = 0; j < apps.length(); j++) {

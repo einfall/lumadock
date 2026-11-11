@@ -24,7 +24,7 @@ final class VolumeOsdView extends View {
     private final Typeface regular=Typeface.create("sans-serif",Typeface.NORMAL);
     private final Typeface light=Typeface.create("sans-serif-light",Typeface.NORMAL);
     private final float density,fontScale;
-    private final String source,mutedLabel;
+    private final String source,shortSource,mutedLabel;
     private ValueAnimator fill,pulse;
     private float level,pop;
     private boolean known,muted;
@@ -32,10 +32,15 @@ final class VolumeOsdView extends View {
     private String number="…",message="…";
 
     VolumeOsdView(Context context,VolumeStyle style){
+        this(context, style, context.getString(R.string.cec_volume_source), "HDMI");
+    }
+
+    VolumeOsdView(Context context,VolumeStyle style,String source,String shortSource){
         super(context);this.style=style;appearance=VolumeAppearance.load(context);themedFace=Typography.face(context,Typography.selected(context,Typography.APPS),R.string.font_light);
         density=getResources().getDisplayMetrics().density;
         fontScale=getResources().getDisplayMetrics().scaledDensity/density;
-        source=context.getString(R.string.cec_volume_source);
+        this.source=source;
+        this.shortSource=shortSource;
         mutedLabel=context.getString(R.string.volume_muted_label);
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
@@ -77,7 +82,7 @@ final class VolumeOsdView extends View {
     private void glass(Canvas c){
         panel(c,300,68,22,0xEE171B23,0x66FFFFFF);
         speaker(c,19,18,23,ink(Color.WHITE));
-        text(c,known?source:"HDMI",56,30,14,mutedInk(0xFFCED5E2),Paint.Align.LEFT,known?155:65);
+        text(c,known?source:shortSource,56,30,14,mutedInk(0xFFCED5E2),Paint.Align.LEFT,known?155:65);
         text(c,known?(muted?mutedLabel+" · "+number:number):message,282,35,
                 known?(muted?17:23):12,ink(Color.WHITE),Paint.Align.RIGHT,known?100:197);
         track(c,18,50,264,4,trackInk(0xFF424954),accent(0xFFE2F1FF));

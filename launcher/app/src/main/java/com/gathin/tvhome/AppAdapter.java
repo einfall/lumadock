@@ -68,6 +68,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static final class Entry {
         static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3, FOLDER = 4;
         List<Entry> folderApps = java.util.Collections.emptyList();
+        boolean folderGlass;
+        boolean folderPopup;
 
         final int kind;
         final String label;
@@ -375,8 +377,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             if (members.isEmpty()) continue;
             Entry tile = new Entry(Entry.FOLDER, folder.name, folder.component(),
-                    folderBanner(folder.name), null, null, 0);
+                    folder.glassTile ? DockFolderPresentation.banner(ctx, members) : folderBanner(folder.name), null, null, 0);
             tile.folderApps = members;
+            tile.folderGlass = folder.glassTile;
+            tile.folderPopup = folder.popup;
             entries.removeAll(members);
             tiles.add(tile);
         }
@@ -558,6 +562,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         h.card.setVisibility(View.VISIBLE);
         h.card.setFocusable(true);
+        h.card.setContentDescription(e.kind == Entry.FOLDER ? e.label : null);
         h.name.setText(e.name);
         Typography.apply(h.name,Typography.APPS,R.string.font_medium);
         Typography.apply(h.label,Typography.APPS,R.string.font_body);
@@ -583,7 +588,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
         // nothing on every frame; keep it under banners with transparent parts and under icon tiles.
         boolean fullBanner = e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE;
-        h.card.setBackground(h.packArtwork || fullBanner ? null : h.cardBackground);
+        h.card.setBackground(h.packArtwork || fullBanner || e.folderGlass ? null : h.cardBackground);
         if (uniformTiles && e.banner == null) {
             if (e.backdrop == null) e.backdrop = backdrop(e.icon, ambientColorAt(position));
             h.card.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, e.backdrop));
@@ -624,6 +629,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void launch(Entry e) {
         if (e.kind == Entry.FOLDER && ctx instanceof Activity) {
             Activity activity = (Activity) ctx;
+            if (e.folderPopup) {
+                DockFolderPresentation.show(activity, e, this::launch);
+                return;
+            }
             SettingsSheet folder = new SettingsSheet(activity, e.label);
             for (Entry app : e.folderApps) {
                 android.widget.LinearLayout row = folder.row(null, app.label, null, () -> launch(app));
@@ -816,7 +825,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * The colour covering most of an icon, for a card that should read as that app: a small saturated badge
      * (a red "new" corner on a blue icon) must not win, as it can with {@link #vividColor}. Grey if none.
      */
-    private static int dominantColor(Drawable live) {
+    static int dominantColor(Drawable live) {
         if (live == null) return 0xFF6E6E73;
         Drawable d = live.getConstantState() != null ? live.getConstantState().newDrawable().mutate() : live;
         Rect saved = new Rect(d.getBounds());

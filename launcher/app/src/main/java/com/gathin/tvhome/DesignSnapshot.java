@@ -25,6 +25,8 @@ final class DesignSnapshot {
     private static final Map<String, Class<?>> HOME = new LinkedHashMap<>();
     private static final Map<String, Class<?>> LIVE = new LinkedHashMap<>();
     private static final Map<String, Class<?>> SAVER = new LinkedHashMap<>();
+    private static final Map<String, Class<?>> TRANSFER_HOME = new LinkedHashMap<>();
+    private static final Map<String, Class<?>> TRANSFER_WEATHER = new LinkedHashMap<>();
 
     static {
         add(HOME, Integer.class, "columns", "dock_columns", "dock_pivot", Config.ROWS_BELOW_DOCK_KEY,
@@ -76,6 +78,15 @@ final class DesignSnapshot {
         add(SAVER, Boolean.class, SaverPrefs.RANDOM);
         add(SAVER, Integer.class, SaverPrefs.DIM, SaverPrefs.MINUTES);
         add(SAVER, String.class, SaverPrefs.MODE, SaverPrefs.PHOTO, SaverPrefs.IMAGE, SaverPrefs.VIDEO, SaverPrefs.TITLE);
+
+        add(TRANSFER_HOME, String.class, NavigationSounds.MODE, NavigationSounds.OUTPUT,
+                VolumeStyle.KEY, VolumeAppearance.MATERIAL, VolumeAppearance.ACCENT);
+        add(TRANSFER_HOME, Integer.class, NavigationSounds.VOLUME, VolumeAppearance.TRANSPARENCY);
+        add(TRANSFER_HOME, Boolean.class, RecentAppsAppearance.BLUR, RecentAppsPolicy.ENABLED,
+                AppUpdates.AUTO, AppUpdates.DOWNLOAD);
+        add(TRANSFER_WEATHER, Boolean.class, "enabled", "show_city");
+        add(TRANSFER_WEATHER, Integer.class, WeatherPolicy.INTERVAL_KEY);
+        add(TRANSFER_WEATHER, String.class, "city", "region", "country", "lat", "lon");
     }
 
     private static void add(Map<String, Class<?>> fields, Class<?> type, String... keys) {
@@ -91,6 +102,12 @@ final class DesignSnapshot {
                 .put("order", order == null ? JSONObject.NULL : Order.encode(order))
                 .put("library", LibraryApps.encode(LibraryApps.load(context)))
                 .put("removed", LibraryApps.encode(LibraryApps.loadRemoved(context)));
+    }
+
+    static JSONObject captureTransfer(Context context) throws JSONException {
+        return capture(context).put("transfer", new JSONObject()
+                .put("home", collect(context, Config.SETTINGS_NAME, TRANSFER_HOME))
+                .put("weather", collect(context, WeatherPanel.PREFS, TRANSFER_WEATHER)));
     }
 
     private static JSONObject collect(Context context, String file, Map<String, Class<?>> fields) throws JSONException {
@@ -114,6 +131,11 @@ final class DesignSnapshot {
         validate(home, HOME);
         validate(snapshot.getJSONObject("live"), LIVE);
         validate(snapshot.getJSONObject("saver"), SAVER);
+        if (snapshot.has("transfer")) {
+            JSONObject extras = snapshot.getJSONObject("transfer");
+            validate(extras.getJSONObject("home"), TRANSFER_HOME);
+            validate(extras.getJSONObject("weather"), TRANSFER_WEATHER);
+        }
         String widgets = home.optString(HomeWidgetStore.ITEMS, "[]");
         JSONArray array = new JSONArray(widgets);
         if (array.length() > HomeWidgetStore.LIMIT) throw new JSONException("Too many widgets");
@@ -179,6 +201,7 @@ final class DesignSnapshot {
 
     static JSONObject portable(Context context, JSONObject snapshot) throws JSONException {
         JSONObject result = decode(snapshot.toString());
+        result.remove("transfer");
         JSONObject home = result.getJSONObject("home");
         replaceWidgets(home, widgets(home, false));
         Set<String> catalog = new HashSet<>();
@@ -214,7 +237,16 @@ final class DesignSnapshot {
     }
 
     static JSONObject forImport(Context context, JSONObject snapshot, JSONObject current) throws JSONException {
-        JSONObject result = portable(context, snapshot);
+        return mergeForImport(context, portable(context, snapshot), current);
+    }
+
+    static JSONObject forTransferImport(Context context, JSONObject snapshot, JSONObject current) throws JSONException {
+        JSONObject result = decode(snapshot.toString());
+        result.getJSONObject("transfer");
+        return mergeForImport(context, result, current);
+    }
+
+    private static JSONObject mergeForImport(Context context, JSONObject result, JSONObject current) throws JSONException {
         JSONObject home = result.getJSONObject("home");
         JSONArray merged = widgets(home, false);
         JSONArray existing = widgets(current.getJSONObject("home"), true);
@@ -259,6 +291,11 @@ final class DesignSnapshot {
         writePrefs(context, LiveWallpaperPrefs.NAME, LIVE, snapshot.getJSONObject("live"));
         writePrefs(context, SaverPrefs.NAME, SAVER, snapshot.getJSONObject("saver"));
         writePrefs(context, Config.SETTINGS_NAME, HOME, snapshot.getJSONObject("home"));
+        if (snapshot.has("transfer")) {
+            JSONObject extras = snapshot.getJSONObject("transfer");
+            writePrefs(context, WeatherPanel.PREFS, TRANSFER_WEATHER, extras.getJSONObject("weather"));
+            writePrefs(context, Config.SETTINGS_NAME, TRANSFER_HOME, extras.getJSONObject("home"));
+        }
     }
 
     private static void writePrefs(Context context, String file, Map<String, Class<?>> fields, JSONObject values)

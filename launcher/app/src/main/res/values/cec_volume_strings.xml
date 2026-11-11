@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="cec_volume_enable">Show HDMI-CEC volume</string>
+    <string name="cec_volume_enable">Show soundbar volume</string>
     <string name="cec_volume_source">HDMI · CEC</string>
     <string name="cec_volume_muted">Muted · %1$d</string>
     <string name="cec_volume_waiting">Waiting for CEC</string>
     <string name="cec_volume_unavailable">No CEC volume value</string>
     <string name="cec_volume_authorize">Allow ADB on TV</string>
+    <string name="sonos_volume_waiting">Reading Sonos volume</string>
+    <string name="sonos_volume_unavailable">Sonos unavailable</string>
+    <string name="sonos_volume_no_device">Select a Sonos device</string>
 </resources>
