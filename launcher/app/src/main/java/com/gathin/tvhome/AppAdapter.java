@@ -69,7 +69,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3, FOLDER = 4;
         List<Entry> folderApps = java.util.Collections.emptyList();
         boolean folderGlass;
-        boolean folderPopup;
+        String folderOpening;
+        boolean folderPivot;
+        String folderNames;
 
         final int kind;
         final String label;
@@ -226,9 +228,22 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /** Packages drawn from their icon and name even when they have a banner (config.xml icon_tiles). */
     private final Set<String> iconTiles;
     private final List<Entry> items = new ArrayList<>();
+    private final Config config;
+    private final DockFolderPresentation folder;
 
     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
+        this(ctx, listener, dockSize, cfg, null);
+    }
+
+    AppAdapter(Context ctx, int columns, Config cfg, DockFolderPresentation folder, List<Entry> entries) {
+        this(ctx, null, columns, cfg, folder);
+        items.addAll(entries);
+    }
+
+    private AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg, DockFolderPresentation folder) {
         this.ctx = ctx;
+        this.config = cfg;
+        this.folder = folder;
         this.listener = listener;
         this.dockSize = dockSize;
         this.gridColumns = cfg.columns;
@@ -239,14 +254,14 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.animations = cfg.animations;
         this.advancedEffects = cfg.animations && cfg.advancedEffects;
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
-        this.showLibrary = LibraryApps.showPill(cfg.appLibrary, cfg.libraryButton, cfg.showLibraryPill);
+        this.showLibrary = folder == null && LibraryApps.showPill(cfg.appLibrary, cfg.libraryButton, cfg.showLibraryPill);
         this.reducedMotion = cfg.reducedMotion;
         this.focusMotion = FocusStyle.motion(ctx,cfg);
         this.rowsBelowDock = cfg.singleRow?0:DockPolicy.fullRows(cfg.rowsBelowDock);
         this.dockTitle = cfg.dockTitle;
-        this.dockRow = cfg.dockRow;
-        this.singleRow = cfg.singleRow;
-        this.restNameAlpha = cfg.alwaysShowNames ? 0.75f : 0f;
+        this.dockRow = folder != null || cfg.dockRow;
+        this.singleRow = folder == null && cfg.singleRow;
+        this.restNameAlpha = folder == null ? (cfg.alwaysShowNames ? 0.75f : 0f) : (folder.allNames() ? 1f : 0f);
         this.cinematic = cfg.cinematicHome;
         this.launchActions = cfg.launchActions;
         this.iconTiles = new HashSet<>(Arrays.asList(ctx.getResources().getStringArray(R.array.icon_tiles)));
@@ -377,10 +392,12 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             if (members.isEmpty()) continue;
             Entry tile = new Entry(Entry.FOLDER, folder.name, folder.component(),
-                    folder.glassTile ? DockFolderPresentation.banner(ctx, members) : folderBanner(folder.name), null, null, 0);
+                    folder.glassTile ? DockFolderPresentation.banner(ctx, config, members) : folderBanner(folder.name), null, null, 0);
             tile.folderApps = members;
             tile.folderGlass = folder.glassTile;
-            tile.folderPopup = folder.popup;
+            tile.folderOpening = folder.opening;
+            tile.folderPivot = folder.pivot;
+            tile.folderNames = folder.names;
             entries.removeAll(members);
             tiles.add(tile);
         }
@@ -504,13 +521,16 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         float density = parent.getResources().getDisplayMetrics().density;
         int width = parent.getWidth() > 0 ? parent.getWidth() : parent.getMeasuredWidth();
         int inner = width - parent.getPaddingLeft() - parent.getPaddingRight();
-        int w = tileWidthPx(inner, parent.getHeight(), viewType == 2 ? dockSize : gridColumns, rowsBelowDock, dockTitle, dockRow, density), h = tileHeightPx(w);
+        int w = folder == null
+                ? tileWidthPx(inner, parent.getHeight(), viewType == 2 ? dockSize : gridColumns, rowsBelowDock, dockTitle, dockRow, density)
+                : folder.tileWidth();
+        int h = tileHeightPx(w);
         View card = v.findViewById(R.id.card);
         ViewGroup.LayoutParams cardLp = card.getLayoutParams();
         cardLp.width = w;
         cardLp.height = h;
         card.setLayoutParams(cardLp);
-        View name = v.findViewById(R.id.name);
+        TextView name = v.findViewById(R.id.name);
         ViewGroup.MarginLayoutParams nameLp = (ViewGroup.MarginLayoutParams) name.getLayoutParams();
         nameLp.width = w;
         nameLp.topMargin = h + Math.round((dockRow ? 7 : 4) * density);
@@ -519,6 +539,14 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nameLp.height = Math.round(20 * density);
             int pad = Math.round(4 * density);
             v.setPadding(v.getPaddingLeft(), pad, v.getPaddingRight(), pad);
+        }
+        if (folder != null) {
+            nameLp.topMargin = h + folder.labelGap(h);
+            nameLp.height = folder.labelHeight();
+            name.setTranslationY(0f);
+            name.setShadowLayer(2 * density, 0f, density, 0xCC000000);
+            v.setPadding(v.getPaddingLeft(), folder.tilePadding(), v.getPaddingRight(), folder.tilePadding());
+            v.getLayoutParams().height = folder.rowHeight();
         }
         name.setLayoutParams(nameLp);
         // A sideways row would stretch a match_parent item across the whole screen: give it a grid column's width.
@@ -541,7 +569,22 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             View label = v.findViewById(R.id.label);
             label.setPadding(label.getPaddingLeft(), label.getPaddingTop(), label.getPaddingRight(), Math.round(4f * density));
         }
-        return new Holder(v, listener, animations, advancedEffects, reducedMotion, restNameAlpha, focusMotion);
+        if (folder != null && folder.isInline()) {
+            View icon = v.findViewById(R.id.icon);
+            FrameLayout.LayoutParams iconSize = (FrameLayout.LayoutParams) icon.getLayoutParams();
+            iconSize.bottomMargin = 0;
+            icon.setLayoutParams(iconSize);
+        }
+        Holder holder = new Holder(v, listener, animations, advancedEffects, reducedMotion, restNameAlpha, focusMotion);
+        if (folder != null) {
+            View.OnFocusChangeListener tileMotion = card.getOnFocusChangeListener();
+            card.setOnFocusChangeListener((view, focused) -> {
+                tileMotion.onFocusChange(view, focused);
+                int position = holder.getBindingAdapterPosition();
+                if (focused && position != RecyclerView.NO_POSITION) folder.focused(position, view);
+            });
+        }
+        return holder;
     }
 
     @Override
@@ -562,6 +605,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         h.card.setVisibility(View.VISIBLE);
         h.card.setFocusable(true);
+        // The native focus highlight shows through the transparent folder artwork.
+        h.card.setDefaultFocusHighlightEnabled(folder == null && !e.folderGlass);
         h.card.setContentDescription(e.kind == Entry.FOLDER ? e.label : null);
         h.name.setText(e.name);
         Typography.apply(h.name,Typography.APPS,R.string.font_medium);
@@ -570,9 +615,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         h.name.setTextSize(14*labelScale);h.label.setTextSize(13*labelScale);
         // The dock has no labels, unless always_show_names asks for them (DockDecoration then makes room in the band).
         // In a single row every tile is the dock's kind: the big title above names it.
-        boolean dockKind = dockRow && (singleRow || position < dockSize);
-        h.name.setVisibility(dockKind && restNameAlpha == 0f ? View.INVISIBLE : View.VISIBLE);
-        if(AppTitleStyle.below(ctx))h.name.setVisibility(View.INVISIBLE);
+        boolean dockKind = dockRow && (folder != null || singleRow || position < dockSize);
+        boolean showName = folder != null ? folder.allNames()
+                : (!dockKind || restNameAlpha != 0f) && !AppTitleStyle.below(ctx);
+        h.name.setVisibility(showName ? View.VISIBLE : View.INVISIBLE);
+        h.name.setTextColor(folder != null && showName ? folder.nameColor(position) : 0xF2FFFFFF);
         h.inDock = dockKind;
         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
         h.name.setAlpha(focused ? 1f : restNameAlpha);
@@ -580,34 +627,40 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         h.card.setScaleY(focused && animations ? focusScale() : 1f);
         h.card.setTranslationY(focused && advancedEffects && !dockKind ? -4f * ctx.getResources().getDisplayMetrics().density : 0f);
         h.card.setTranslationZ(focused && advancedEffects ? 8f * ctx.getResources().getDisplayMetrics().density : 0f);
-        h.packArtwork = e.banner instanceof IconPackArtwork;
-        h.banner.setScaleType(h.packArtwork ? ImageView.ScaleType.FIT_CENTER : ImageView.ScaleType.CENTER_CROP);
-        float artworkZoom = focused && advancedEffects && focusMotion.zoom && !h.packArtwork ? 1.035f : 1f;
+        boolean packArtwork = e.banner instanceof IconPackArtwork;
+        h.zoomArtwork = !packArtwork && !e.folderGlass;
+        h.banner.setScaleType(packArtwork ? ImageView.ScaleType.FIT_CENTER : ImageView.ScaleType.CENTER_CROP);
+        float artworkZoom = focused && advancedEffects && focusMotion.zoom && h.zoomArtwork ? 1.035f : 1f;
         h.banner.setScaleX(artworkZoom);
         h.banner.setScaleY(artworkZoom);
         // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
         // nothing on every frame; keep it under banners with transparent parts and under icon tiles.
         boolean fullBanner = e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE;
-        h.card.setBackground(h.packArtwork || fullBanner || e.folderGlass ? null : h.cardBackground);
+        h.card.setBackground(packArtwork || fullBanner || e.folderGlass ? null : h.cardBackground);
         if (uniformTiles && e.banner == null) {
             if (e.backdrop == null) e.backdrop = backdrop(e.icon, ambientColorAt(position));
             h.card.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, e.backdrop));
         }
         if (e.banner != null) {
-            h.banner.setImageDrawable(e.banner);
+            h.banner.setImageDrawable(tileDrawable(e.banner));
             h.banner.setVisibility(View.VISIBLE);
             h.icon.setVisibility(View.GONE);
             h.label.setVisibility(View.GONE);
         } else {
             h.banner.setImageDrawable(null);
             h.banner.setVisibility(View.GONE);
-            h.icon.setImageDrawable(e.icon);
+            h.icon.setImageDrawable(tileDrawable(e.icon));
             h.icon.setVisibility(View.VISIBLE);
             h.label.setText(e.label);
-            h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
+            h.label.setVisibility(uniformTiles || (folder != null && folder.isInline()) ? View.GONE : View.VISIBLE);
         }
         h.card.invalidateOutline();
         h.card.setForeground(null); // TileEffectsDecoration also allows a rim outside the artwork.
+        if (folder != null) {
+            h.card.setContentDescription(e.label);
+            h.card.setOnClickListener(v -> folder.open(e));
+            return;
+        }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
             if (tileMenu) {
@@ -625,12 +678,37 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
     }
 
+    private Drawable tileDrawable(Drawable artwork) {
+        // A popup has its own ImageViews. Keep their drawable callbacks separate from Home.
+        if (folder == null || artwork == null) return artwork;
+        if (artwork instanceof IconPackArtwork) return ((IconPackArtwork) artwork).copy(ctx.getResources());
+        Drawable.ConstantState state = artwork.getConstantState();
+        return state == null ? artwork : state.newDrawable(ctx.getResources()).mutate();
+    }
+
+    boolean hasAutomaticFolderAt(int position) {
+        if (position < 0 || position >= items.size()) return false;
+        Entry entry = items.get(position);
+        return entry.kind == Entry.FOLDER && "list_focus".equals(entry.folderOpening);
+    }
+
+    void previewFolder(int position, View card) {
+        if (hasAutomaticFolderAt(position)) {
+            ((MainActivity) ctx).showFolderList(items.get(position), card, this::launch, false);
+        }
+    }
+
     /** Opens the tile's activity by explicit component, with no extras: a card can name nothing else. */
     private void launch(Entry e) {
         if (e.kind == Entry.FOLDER && ctx instanceof Activity) {
             Activity activity = (Activity) ctx;
-            if (e.folderPopup) {
-                DockFolderPresentation.show(activity, e, this::launch);
+            if (activity instanceof MainActivity && activity.getCurrentFocus() != null) {
+                MainActivity home = (MainActivity) activity;
+                if ("popup".equals(e.folderOpening)) {
+                    DockFolderPresentation.show(home, e, activity.getCurrentFocus(), this::launch);
+                } else {
+                    home.showFolderList(e, activity.getCurrentFocus(), this::launch, true);
+                }
                 return;
             }
             SettingsSheet folder = new SettingsSheet(activity, e.label);
@@ -1038,7 +1116,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final FocusMotion motion;
         /** A dock tile: it grows in place without advanced_effects' lift, which reads as off-centre in the band (#2135). */
         boolean inDock;
-        boolean packArtwork;
+        boolean zoomArtwork;
 
         Holder(View v, TileListener listener, boolean animations, boolean advancedEffects,
                boolean reducedMotion, float restNameAlpha, FocusMotion motion) {
@@ -1105,7 +1183,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     // Same place as the full motion's slide ends: the layout's -6dp is only its starting point, and
                     // left there the name overlaps the zoomed tile.
                     // Only on focus: snapping it back to -6dp while it fades out would jump it up over the tile.
-                    if (focused) name.setTranslationY(density * 4f);
+                    if (focused && restNameAlpha < 1f) name.setTranslationY(density * 4f);
                 } else {
                     view.animate().scaleX(s).scaleY(s)
                             .translationY(focused && advancedEffects && !inDock ? -4f * density : 0f)
@@ -1113,12 +1191,12 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             .setDuration(motion.duration(focused,false,advancedEffects))
                             .setInterpolator(motion.useBounce(false)?new OvershootInterpolator(focused?1.4f:.8f):new DecelerateInterpolator(1.5f))
                             .withLayer().start();
-                    if (advancedEffects && motion.zoom && !packArtwork) {
+                    if (advancedEffects && motion.zoom && zoomArtwork) {
                         banner.animate().scaleX(focused ? 1.035f : 1f).scaleY(focused ? 1.035f : 1f)
                                 .setDuration(280).start();
                     }
                     name.animate().alpha(focused ? 1f : restNameAlpha)
-                            .translationY(focused ? density * 4f : -density * 6f)
+                            .translationY(restNameAlpha == 1f ? 0f : focused ? density * 4f : -density * 6f)
                             .setDuration(220).start();
                 }
                 int pos = getBindingAdapterPosition();

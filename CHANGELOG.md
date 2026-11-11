@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.3 — 2026-11-11
+
+- Offer a folder popup, a vertical list opened with OK, or an automatic list when the folder receives focus. Up enters the automatic list at the first app, closest to the dock. Down returns from the first app to the folder.
+- Use full-size dock tiles, the active dock glass theme and focus effects in the vertical list. Remove separate app labels and scroll when the available height cannot fit all tiles. List pivot remains optional.
+- Match the folder popup and preview to the dock theme. Keep the popup clear of the dock, support an inline folder and app heading, and clip folder previews to clean rounded corners.
+
 ## 1.2.0 — 2026-11-11
 
 - Copy the active Luma Dock setup between TVs on the same home network. Device discovery, an expiring one-time code and TLS protect the transfer. Review the incoming setup before applying it and undo the last import from Profiles & Backup.

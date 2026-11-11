@@ -21,9 +21,11 @@ final class FocusedAppName implements PlacementTarget {
     private final TextView caption;
     private final SharedPreferences prefs;
     private final float density;
+    private final boolean folder;
     private final Rect cardBounds=new Rect();
     private final Rect artworkBounds=new Rect();
     private boolean enabled,closed;
+    private int appliedColor;
     private float edge,targetScale,textHeight;
     private float baseX,baseY;private boolean preview;private int previewX,previewY;
     private final ViewTreeObserver.OnPreDrawListener draw=()->{place();return true;};
@@ -32,17 +34,21 @@ final class FocusedAppName implements PlacementTarget {
     };
 
     FocusedAppName(Activity a,ViewGroup root){
-        activity=a;this.root=root;grid=a.findViewById(R.id.grid);density=a.getResources().getDisplayMetrics().density;
+        this(a, root, a.findViewById(R.id.grid), false);
+    }
+    FocusedAppName(Activity a,ViewGroup root,RecyclerView grid,boolean folder){
+        activity=a;this.root=root;this.grid=grid;this.folder=folder;density=a.getResources().getDisplayMetrics().density;
         prefs=a.getSharedPreferences(Config.SETTINGS_NAME,0);caption=new TextView(a);
         caption.setSingleLine(true);caption.setEllipsize(TextUtils.TruncateAt.END);caption.setGravity(Gravity.CENTER);
         caption.setIncludeFontPadding(false);caption.setTextColor(0xF2FFFFFF);caption.setLetterSpacing(.02f);
         caption.setShadowLayer(2*density,0,density,0xCC000000);
         caption.setFocusable(false);caption.setClickable(false);caption.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        if (folder) caption.setElevation(3 * density);
         caption.setVisibility(View.INVISIBLE);root.addView(caption,new FrameLayout.LayoutParams(1,1));
         prefs.registerOnSharedPreferenceChangeListener(change);root.getViewTreeObserver().addOnPreDrawListener(draw);refresh();
     }
     void refresh(){
-        if(closed)return;enabled=AppTitleStyle.below(activity);
+        if(closed)return;enabled=folder||AppTitleStyle.below(activity);
         float size=14f*AppTitlePolicy.labels(prefs.getInt(AppTitleStyle.LABELS,100))/100f;
         caption.setTextSize(size);Typography.apply(caption,Typography.APPS,R.string.font_medium);
         textHeight=Math.max(22*density,caption.getPaint().getFontMetrics().bottom-caption.getPaint().getFontMetrics().top+2*density);
@@ -71,7 +77,13 @@ final class FocusedAppName implements PlacementTarget {
         RecyclerView.ViewHolder holder=grid.getChildViewHolder(item);RecyclerView.Adapter<?> adapter=grid.getAdapter();
         int pos=holder.getBindingAdapterPosition();
         if(!(adapter instanceof AppAdapter)||pos<0||pos>=((AppAdapter)adapter).appCount()){caption.setVisibility(View.INVISIBLE);return;}
-        caption.setTextColor(prefs.getBoolean(AppTitleStyle.DOMINANT,false)?((AppAdapter)adapter).iconDominantAt(pos):0xF2FFFFFF);String label=((AppAdapter)adapter).labelAt(pos);if(!label.contentEquals(caption.getText()))caption.setText(label);
+        int color = prefs.getBoolean(AppTitleStyle.DOMINANT, false) ? ((AppAdapter) adapter).iconDominantAt(pos) : 0xF2FFFFFF;
+        if (appliedColor != color) {
+            appliedColor = color;
+            caption.setTextColor(folder ? DockFolderPresentation.readableNameColor(color) : color);
+        }
+        String label = ((AppAdapter) adapter).labelAt(pos);
+        if (!label.contentEquals(caption.getText())) caption.setText(label);
         // Layout coordinates deliberately exclude the zoom matrix; include the item's pivot animation separately.
         cardBounds.set(0,0,card.getWidth(),card.getHeight());root.offsetDescendantRectToMyCoords(card,cardBounds);
         AppAdapter.artBounds(card, artworkBounds);
@@ -84,8 +96,8 @@ final class FocusedAppName implements PlacementTarget {
         // A partially clipped row must not leave a detached caption over the header or another row.
         if(y<0||y+height>root.getHeight()||!item.isShown()){caption.setVisibility(View.INVISIBLE);return;}
         baseX=AppTitlePolicy.captionLeft(left+artworkBounds.width()/2f,width,root.getWidth(),8*density);baseY=y;
-        caption.setX(HeaderLayoutPolicy.clamp(preview?Math.round(previewX*density):Math.round(baseX+prefs.getInt(DX,0)*density),root.getWidth(),width));
-        caption.setY(HeaderLayoutPolicy.clamp(preview?Math.round(previewY*density):Math.round(baseY+prefs.getInt(DY,0)*density),root.getHeight(),height));
+        caption.setX(HeaderLayoutPolicy.clamp(preview?Math.round(previewX*density):Math.round(baseX+(folder?0:prefs.getInt(DX,0))*density),root.getWidth(),width));
+        caption.setY(HeaderLayoutPolicy.clamp(preview?Math.round(previewY*density):Math.round(baseY+(folder?0:prefs.getInt(DY,0))*density),root.getHeight(),height));
         caption.setVisibility(View.VISIBLE);
     }
     public View view(String key){return caption;}

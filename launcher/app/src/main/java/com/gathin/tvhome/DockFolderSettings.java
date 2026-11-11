@@ -73,10 +73,24 @@ final class DockFolderSettings {
             folder.glassTile = on;
             save(folders);
         });
-        editor.toggle("Zentriertes App-Popup", "OK öffnet den Ordner als Raster mit großen App-Kacheln", folder.popup, on -> {
-            folder.popup = on;
+        String[] openings = {"popup", "list_ok", "list_focus"};
+        editor.options("folder", "Ordner öffnen",
+                new String[]{"Popup", "Liste mit OK", "Liste bei Fokus"},
+                i -> openings[i].equals(folder.opening), i -> {
+                    folder.opening = openings[i];
+                    save(folders);
+                });
+        editor.toggle("Listen-Pivot", "Bis zu fünf Apps. Die Auswahl bleibt beim Scrollen möglichst mittig.", folder.pivot, on -> {
+            folder.pivot = on;
             save(folders);
         });
+        String[] placements = {"dock", "top", "focused", "all"};
+        editor.options("text", "App-Namen im Popup",
+                new String[]{"Wie im Dock", "Oben mittig", "Unter dem Fokus", "Alle"},
+                i -> placements[i].equals(folder.names), i -> {
+                    folder.names = placements[i];
+                    save(folders);
+                });
         editor.group("APPS");
         AppAppearance apps = new AppAppearance(activity, Config.load(activity));
         for (AppAppearance.Item item : apps.items) {

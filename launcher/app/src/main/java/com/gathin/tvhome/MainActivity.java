@@ -188,6 +188,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private AppAdapter adapter;
     private RecyclerView grid;
     private FrameLayout root;
+    private DockFolderPresentation folderList;
+    private boolean folderPreviewPending;
     private WallpaperPlayer wallpaperPlayer;
     private LiveWallpaperPlayer liveWallpaper;
     private GlassView glass;
@@ -967,9 +969,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (oldF != null && oldF.getId() == R.id.weatherBlock) {
                 oldF.animate().cancel();oldF.setScaleX(1f);oldF.setScaleY(1f);
             }
-            boolean onTile = newF != null && newF.getId() == R.id.card;
+            if (folderList != null && newF != null && !folderList.ownsFocus(newF)) closeFolderList();
+            boolean onTile = newF != null && newF.getId() == R.id.card && focusedTilePosition() >= 0;
             if (newF != null && newF.getId() == R.id.weatherBlock) showWeatherGlass(newF);
             else if (!onTile) hideGlass();
+        });
+
+        root.getViewTreeObserver().addOnPreDrawListener(() -> {
+            scheduleFolderPreview();
+            return true;
         });
 
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -1320,6 +1328,68 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
     AppTitleStyle appTitleStyle(){return appTitleStyle;}
 
+    FrameLayout folderRoot() { return root; }
+
+    void avoidFolderTitleOverlap(Rect list) {
+        if (heroName == null || appTitleStyle == null) return;
+        boolean overlap = list != null && Rect.intersects(list, appTitleStyle.bounds("title"));
+        heroName.setAlpha(overlap ? 0f : 1f);
+    }
+
+    Rect folderArea(View anchor) {
+        Rect band = dockMove.bounds("dock");
+        Rect tile = new Rect(0, 0, anchor.getWidth(), anchor.getHeight());
+        root.offsetDescendantRectToMyCoords(anchor, tile);
+        int margin = Math.round(12 * density);
+        int top = band.isEmpty() ? tile.top : Math.min(band.top, tile.top);
+        int bottom = band.isEmpty() ? tile.bottom : Math.max(band.bottom, tile.bottom);
+        int above = Math.max(margin, top - margin);
+        int below = Math.min(root.getHeight() - margin, bottom + margin);
+        if (above - margin >= Math.round(180 * density) || above - margin >= root.getHeight() - margin - below) {
+            return new Rect(0, margin, root.getWidth(), above);
+        }
+        return new Rect(0, below, root.getWidth(), root.getHeight() - margin);
+    }
+
+    void showFolderList(AppAdapter.Entry entry, View card,
+                        java.util.function.Consumer<AppAdapter.Entry> launch, boolean enter) {
+        if (card == null || !card.isAttachedToWindow() || card.getWidth() <= 0 || reordering || !hasWindowFocus()) return;
+        if (folderList == null || !folderList.hasAnchor(card)) {
+            closeFolderList();
+            folderList = DockFolderPresentation.list(this, entry, card, launch);
+        }
+        if (enter && folderList != null) folderList.enterList();
+    }
+
+    void leaveFolderList() {
+        if (folderList == null) return;
+        View anchor = folderList.anchor();
+        if (!folderList.automatic()) closeFolderList();
+        if (anchor.isAttachedToWindow()) anchor.requestFocus();
+        if (folderList != null) folderList.previewList();
+    }
+
+    private void scheduleFolderPreview() {
+        if (folderPreviewPending || folderList != null || !canPreviewFolder()) return;
+        if (!adapter.hasAutomaticFolderAt(focusedTilePosition())) return;
+        folderPreviewPending = true;
+        root.post(() -> {
+            folderPreviewPending = false;
+            if (folderList == null && canPreviewFolder()) adapter.previewFolder(focusedTilePosition(), getCurrentFocus());
+        });
+    }
+
+    private boolean canPreviewFolder() {
+        return adapter != null && hasWindowFocus() && !reordering && openPopup == null && cardPrompt == null;
+    }
+
+    private void closeFolderList() {
+        if (folderList == null) return;
+        DockFolderPresentation list = folderList;
+        folderList = null;
+        list.dispose();
+    }
+
     Rect titleDockBounds() {
         Rect band = dockMove.bounds("dock");
         if (!band.isEmpty()) return band;
@@ -1461,6 +1531,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * ones and cards stay off for this process.
      */
     private void reloadTiles() {
+        closeFolderList();
         if (reordering) endReorder();   // an app installed or removed while reordering: keep the order so far
         // Read these before reload(): rebinding can move focus to the first tile and overwrite them.
         final String returnKey = lastFocusedKey;
@@ -1513,6 +1584,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();cancelDockBrowse();cancelGlassReveal();
+        closeFolderList();
         cancelRecentBack();cancelHeldAppKey();appOkCode=-1;
         weatherWidget.stop();
         resumed = false;
@@ -1578,7 +1650,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onWindowFocusChanged(hasFocus);
         if (root != null) {
             if (hasFocus) restartIdleClock();
-            else root.removeCallbacks(showIdleClock);
+            else {
+                root.removeCallbacks(showIdleClock);
+                closeFolderList();
+            }
         }
         if (hasFocus) {
             startPendingSettingsReorder();
@@ -1589,6 +1664,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onDestroy() {
+        closeFolderList();
         if(dockMove!=null)dockMove.close();
         if(dockPageDots!=null)dockPageDots.close();
         if(tileEffects!=null)tileEffects.dispose();
@@ -1643,6 +1719,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (folderList != null && folderList.handleKey(event)) return true;
         if(handleRecentBack(event))return true;
         if(contentPreview!=null&&contentPreview.enterFromDock(event,dockFocused()))return true;
         int backCode=event.getKeyCode();
@@ -1719,7 +1796,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private int focusedTilePosition() {
         View f = getCurrentFocus();
         if (f == null || f.getId() != R.id.card || !(f.getParent() instanceof View)) return -1;
-        return grid.getChildAdapterPosition((View) f.getParent());
+        View item = (View) f.getParent();
+        return item.getParent() == grid ? grid.getChildAdapterPosition(item) : RecyclerView.NO_POSITION;
     }
 
     /** The reorder button: turns the mode on (focus goes back to the last tile), or off again. */
@@ -1735,6 +1813,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** The start shared by reorder and edit-dock mode. False when there is nothing to move. */
     private boolean beginReorder() {
+        closeFolderList();
         if (adapter.movableCount() < 2) return false;
         // Before the reload below: once it has dropped the empty slots, the dock row also shows grid apps.
         dockInSession = new HashSet<>();
@@ -2138,6 +2217,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             grid.requestChildRectangleOnScreen(item, revealRect, reducedMotion);
         }
         animateDockBrowse(browseDx);
+        scheduleFolderPreview();
     }
 
     /** Reuse the app tiles' glass, radius and focus scale for the weather field. */

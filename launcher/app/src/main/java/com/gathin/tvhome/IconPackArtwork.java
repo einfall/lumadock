@@ -69,6 +69,10 @@ final class IconPackArtwork extends BitmapDrawable {
         return new Rect(left, top, right + 1, bottom + 1);
     }
 
+    IconPackArtwork copy(Resources resources) {
+        return new IconPackArtwork(resources, getBitmap());
+    }
+
     void fit(int slotWidth, int slotHeight, Rect output) {
         int width = getIntrinsicWidth();
         int height = getIntrinsicHeight();

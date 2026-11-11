@@ -23,6 +23,7 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 ## Funktionen
 
 - Dock und Raster mit wählbaren Spalten, Paging/Pivot, Sortierung, App-Namen und Icon-Packs.
+- Dock-Ordner mit Glasvorschau, Popup oder senkrechter Liste in Dock-Größe. Bei automatischer Vorschau wählt ↑ die erste App über dem Ordner.
 - Fokusrahmen, Abstand, Stärke, Glanz, Farbverläufe, Glow und Zoom getrennt anpassbar.
 - Glas- und Farb-Themes für Dock, Buttons und Widgets; direkte Vorschau in der Einstellungen-Liste.
 - Fotos, Verläufe und stumme Live-Hintergründe, Favoriten per langem OK und kombinierbare Wechselregeln.
@@ -39,7 +40,7 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 
 ## Download
 
-[Version 1.2.0 herunterladen](https://github.com/einfall/lumadock/releases/tag/v1.2.0). Die signierte APK kann ab Android 8.0 installiert werden. Bestehende Installationen mit derselben Signatur können über **Info** aktualisiert werden.
+[Version 1.2.3 herunterladen](https://github.com/einfall/lumadock/releases/tag/v1.2.3). Die signierte APK kann ab Android 8.0 installiert werden. Bestehende Installationen mit derselben Signatur können über **Info** aktualisiert werden.
 
 ## Einrichtung auf einen zweiten TV übertragen
 

@@ -22,7 +22,9 @@ final class DockFolders {
         final String id;
         String name;
         boolean glassTile;
-        boolean popup;
+        String opening = "list_ok";
+        boolean pivot;
+        String names = "dock";
         final Set<String> packages = new LinkedHashSet<>();
 
         Folder(String id, String name) {
@@ -60,13 +62,21 @@ final class DockFolders {
                 object.put("name", folder.name);
                 object.put("apps", new JSONArray(folder.packages));
                 object.put("glassTile", folder.glassTile);
-                object.put("popup", folder.popup);
+                object.put("popup", "popup".equals(folder.opening));
+                object.put("opening", folder.opening);
+                object.put("pivot", folder.pivot);
+                object.put("names", folder.names);
             } catch (JSONException impossible) {
                 throw new IllegalArgumentException(impossible);
             }
             result.put(object);
         }
         prefs(context).edit().putString(KEY, result.toString()).apply();
+    }
+
+    static String nameMode(String mode) {
+        if ("top".equals(mode) || "focused".equals(mode) || "all".equals(mode)) return mode;
+        return "dock";
     }
 
     static List<Folder> decode(String text) throws JSONException {
@@ -84,7 +94,10 @@ final class DockFolders {
             }
             Folder folder = new Folder(id, name);
             folder.glassTile = object.optBoolean("glassTile");
-            folder.popup = object.optBoolean("popup");
+            String opening = object.optString("opening", object.optBoolean("popup") ? "popup" : "list_ok");
+            folder.opening = "popup".equals(opening) || "list_focus".equals(opening) ? opening : "list_ok";
+            folder.pivot = object.optBoolean("pivot");
+            folder.names = nameMode(object.optString("names"));
             JSONArray apps = object.getJSONArray("apps");
             if (apps.length() > 300) throw new JSONException("Too many folder apps");
             for (int j = 0; j < apps.length(); j++) {
