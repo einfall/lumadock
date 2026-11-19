@@ -1414,6 +1414,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         settingsRevision=settingsRevision();grid.invalidateItemDecorations();
     }
     void refreshLiveWallpaper(){if(liveWallpaper!=null)liveWallpaper.refresh();}
+    void previewYouTube(boolean showing){if(liveWallpaper!=null)liveWallpaper.preview(showing);}
     void settleLiveWallpaperInput(){grid.postDelayed(()->{if(!isFinishing()&&!isDestroyed())refreshDesignPreview();},250);}
 
     private void setPillLabel(TextView pill,boolean text,String label){if(text)makeLabelled(pill,label);else makeIconOnly(pill);pill.requestLayout();}
@@ -1592,6 +1593,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();homeBackdrop.stop();
         liveWallpaper.stop();if(contentPreview!=null)contentPreview.stop();
+        YouTubePreview.close(this);
         stopAmbientAnimation();
         cancelHeroTransition();
         ambient.animate().cancel();

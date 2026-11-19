@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.6 — 2026-11-19
+
+- Add YouTube video search without requiring an API key, thumbnail results, a seekable preview, and fixed or random live-background playback.
+- Keep background types, live sources, YouTube search and automatic switching in one settings view. Animate tab changes and show three neighboring tabs. At each edge, move the selection toward the center before scrolling, without empty leading or trailing slots.
+- Merge YouTube and catalog favorites into one live-background list, preserve existing favorites, and label their origin. Hold OK to add or remove a favorite.
+- Select multiple random sources with checkboxes: Apple Aerials, Amazon, Community, favorites and YouTube, or all sources. Deduplicate videos and keep gallery browsing independent of rotation settings.
+- Passed 530 unit tests and Android lint with zero errors. Verified tab edges, pivot navigation, shared favorites and inline switching settings on a Philips Android TV.
+
 ## 1.2.3 — 2026-11-11
 
 - Offer a folder popup, a vertical list opened with OK, or an automatic list when the folder receives focus. Up enters the automatic list at the first app, closest to the dock. Down returns from the first app to the folder.

@@ -1,24 +1,152 @@
 package com.gathin.tvhome;
+
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.widget.*;
-/** Fixed selection and mixed rotation, with the existing interval/Home/TV wake triggers. */
+import android.content.res.ColorStateList;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+/** Rotation settings share the background tab instead of opening a second settings window. */
 final class BackgroundSwitchPopup {
-    static void show(Activity a,Runnable changed){
-        SharedPreferences p=LiveWallpaperPrefs.prefs(a),config=a.getSharedPreferences(Config.SETTINGS_NAME,0);SettingsSheet sheet=new SettingsSheet(a,"Hintergrund · Wechsel");
-        TextView status=GlassDialog.text(a,"",12);status.setPadding(SettingsSheet.dp(a,7),SettingsSheet.dp(a,5),0,SettingsSheet.dp(a,9));sheet.add(status);
-        sheet.options("photo","Auswahl",new String[]{"Fest","Wechsel"},i->(i==1)==BackgroundSelection.automatic(a),i->BackgroundSelection.mode(a,i==1?"rotation":"fixed"));
-        String[] types={"Live-Hintergründe","Bilder","Verläufe"};sheet.options("grid","Was darf wechseln?",types,i->BackgroundSelection.types(a).contains(BackgroundRotationPolicy.TYPES[i]),i->BackgroundSelection.type(a,BackgroundRotationPolicy.TYPES[i]),true);
-        String[] triggers={"off","interval","home","tv"};String[] names={"Aus","Nach Zeit","Bei Home-Start","Bei TV-Start"};
-        sheet.options("timer","Wann wechseln?",names,i->i==0?LiveWallpaperSelection.triggers(a).isEmpty():LiveWallpaperSelection.triggers(a).contains(triggers[i]),i->LiveWallpaperSelection.trigger(a,triggers[i],i==0||!LiveWallpaperSelection.triggers(a).contains(triggers[i])),true);
-        sheet.add(new GridSlider(a,"Intervall (Minuten)",1,240,LiveRotationPolicy.minutes(p.getInt(LiveWallpaperSelection.MINUTES,15)),n->p.edit().putInt(LiveWallpaperSelection.MINUTES,n).apply()));
-        String[] sources={"favorites","category","all","A","Z","C"};sheet.options("video","Live-Hintergründe aus",java.util.Arrays.stream(sources).map(id->LiveWallpaperSelection.name(a,id)).toArray(String[]::new),i->sources[i].equals(p.getString(LiveWallpaperSelection.POOL,"category")),i->p.edit().putString(LiveWallpaperSelection.POOL,sources[i]).apply());
-        sheet.info("Bilder und Verläufe stammen aus den eingebauten Sammlungen. Gewählte Arten haben die gleiche Chance; leere Sammlungen werden übersprungen. Ohne Art oder Auslöser pausiert der Wechsel. Er läuft nur auf Home.");
-        sheet.row("move","Jetzt wechseln","Einmal aus den erlaubten Arten auswählen",()->{if(BackgroundSelection.random(a))changed.run();else Toast.makeText(a,"Keine Hintergründe für diese Auswahl vorhanden",Toast.LENGTH_LONG).show();});
-        sheet.row("video","Live-Hintergründe einstellen","Eigene Datei / URL, Suche und Abdunklung",()->LiveWallpaperPopup.show(a,changed));
-        if(a instanceof MainActivity)sheet.row("photo","Eigene Theme-Bilder",null,()->LauncherBehaviorPopup.wallpapers((MainActivity)a));
-        sheet.info("Eine Kachel oder eigene Datei setzt einen festen Hintergrund und pausiert den Wechsel. Deine Wechselregeln bleiben gespeichert. Fest hält den gerade sichtbaren Hintergrund.");
-        Runnable update=()->{String note=BackgroundSelection.automatic(a)?"Wechsel":"Fest";if(BackgroundSelection.automatic(a)&&(BackgroundSelection.types(a).isEmpty()||LiveWallpaperSelection.triggers(a).isEmpty()))note+=" · pausiert";status.setText(note+"\n"+BackgroundSelection.currentLabel(a));sheet.refreshChoices();};
-        SharedPreferences.OnSharedPreferenceChangeListener listener=(sp,key)->update.run();p.registerOnSharedPreferenceChangeListener(listener);config.registerOnSharedPreferenceChangeListener(listener);sheet.dialog.setOnDismissListener(d->{p.unregisterOnSharedPreferenceChangeListener(listener);config.unregisterOnSharedPreferenceChangeListener(listener);});update.run();sheet.show();
+    static void show(Activity activity, Runnable changed) {
+        DesignStudio.background(activity, "Wechsel");
+    }
+
+    static View content(Activity activity, Runnable changed) {
+        return new Panel(activity, changed);
+    }
+
+    private static final class Panel extends ScrollView {
+        private final Activity activity;
+        private final SharedPreferences prefs;
+        private final SharedPreferences config;
+        private final List<SettingsOptions> options = new ArrayList<>();
+        private final CheckBox[] sources = new CheckBox[LiveSourcePolicy.IDS.length];
+        private final TextView status;
+        private final TextView sourceTitle;
+        private final GridSlider interval;
+        private final SharedPreferences.OnSharedPreferenceChangeListener listener = (p, key) -> refresh();
+        private boolean updating;
+        private final LinearLayout body;
+
+        Panel(Activity activity, Runnable changed) {
+            super(activity);
+            this.activity = activity;
+            prefs = LiveWallpaperPrefs.prefs(activity);
+            config = activity.getSharedPreferences(Config.SETTINGS_NAME, 0);
+            setVerticalScrollBarEnabled(false);
+            setFocusable(false);
+            body = new LinearLayout(activity);
+            body.setOrientation(LinearLayout.VERTICAL);
+            body.setPadding(dp(4), dp(3), dp(4), dp(6));
+            addView(body, new LayoutParams(-1, -2));
+
+            choice("photo", "Wiedergabe", new String[]{"Fest", "Automatisch"},
+                    i -> (i == 1) == BackgroundSelection.automatic(activity),
+                    i -> BackgroundSelection.mode(activity, i == 1 ? "rotation" : "fixed"), false).compact();
+            choice("grid", "Hintergründe", new String[]{"Live", "Bilder", "Verläufe"},
+                    i -> BackgroundSelection.types(activity).contains(BackgroundRotationPolicy.TYPES[i]),
+                    i -> BackgroundSelection.type(activity, BackgroundRotationPolicy.TYPES[i]), true).compact();
+            sourceTitle = GlassDialog.text(activity, "Live-Quellen für Zufall", 12);
+            sourceTitle.setPadding(dp(8), dp(8), 0, dp(3));
+            body.addView(sourceTitle);
+            LinearLayout row = null;
+            for (int i = 0; i < sources.length; i++) {
+                if (i % 3 == 0) {
+                    row = new LinearLayout(activity);
+                    body.addView(row, new LinearLayout.LayoutParams(-1, -2));
+                }
+                String id = LiveSourcePolicy.IDS[i];
+                CheckBox check = new CheckBox(activity);
+                check.setId(View.generateViewId());
+                check.setText("all".equals(id) ? "Alle Quellen" : LiveWallpaperSelection.name(activity, id));
+                check.setTextSize(12);
+                check.setSingleLine(true);
+                check.setTextColor(SettingsSheet.ink(0xFFE7EDF5, 0xFF15202D));
+                check.setButtonTintList(ColorStateList.valueOf(0xFF85B9EC));
+                check.setBackground(SettingsSheet.rowBackground(activity));
+                check.setPadding(dp(7), 0, dp(7), 0);
+                check.setMinHeight(dp(31));
+                check.setOnCheckedChangeListener((button, enabled) -> {
+                    if (!updating) LiveWallpaperSelection.source(activity, id, enabled);
+                });
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(33), 1);
+                params.setMargins(dp(2), dp(2), dp(2), dp(2));
+                row.addView(check, params);
+                sources[i] = check;
+            }
+
+            String[] triggers = {"off", "interval", "home", "tv"};
+            choice("timer", "Wann wechseln?", new String[]{"Aus", "Nach Zeit", "Home-Start", "TV-Start"},
+                    i -> i == 0 ? LiveWallpaperSelection.triggers(activity).isEmpty()
+                            : LiveWallpaperSelection.triggers(activity).contains(triggers[i]),
+                    i -> LiveWallpaperSelection.trigger(activity, triggers[i],
+                            i == 0 || !LiveWallpaperSelection.triggers(activity).contains(triggers[i])), true);
+            interval = new GridSlider(activity, "Intervall (Minuten)", 1, 240,
+                    LiveRotationPolicy.minutes(prefs.getInt(LiveWallpaperSelection.MINUTES, 15)),
+                    n -> prefs.edit().putInt(LiveWallpaperSelection.MINUTES, n).apply());
+            body.addView(interval);
+            LinearLayout next = SettingsSheet.row(activity, "move", "Jetzt wechseln", null, "›");
+            next.setOnClickListener(v -> {
+                if (BackgroundSelection.random(activity)) changed.run();
+                else Toast.makeText(activity, "Keine Hintergründe für diese Auswahl vorhanden", Toast.LENGTH_LONG).show();
+            });
+            body.addView(next);
+            status = GlassDialog.text(activity, "", 10);
+            status.setMaxLines(2);
+            status.setTextColor(0xFFA6B6C8);
+            status.setPadding(dp(8), dp(7), dp(8), dp(5));
+            body.addView(status);
+            refresh();
+        }
+
+        private int dp(int value) { return SettingsSheet.dp(activity, value); }
+
+        private SettingsOptions choice(String icon, String title, String[] names,
+                            java.util.function.IntPredicate selected,
+                            java.util.function.IntConsumer action, boolean multiple) {
+            SettingsOptions choice = new SettingsOptions(activity, icon, title, names, selected, action, multiple);
+            options.add(choice);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+            params.bottomMargin = dp(3);
+            body.addView(choice, params);
+            return choice;
+        }
+
+        private void refresh() {
+            updating = true;
+            Set<String> selected = LiveWallpaperSelection.sources(activity);
+            for (int i = 0; i < sources.length; i++) sources[i].setChecked(selected.contains(LiveSourcePolicy.IDS[i]));
+            updating = false;
+            for (SettingsOptions option : options) option.refresh();
+            int count = LiveWallpaperSelection.rotationPool(activity).size();
+            sourceTitle.setText("Live-Quellen · " + count + (count == 1 ? " Video" : " Videos"));
+            interval.setVisibility(LiveWallpaperSelection.triggers(activity).contains("interval") ? VISIBLE : GONE);
+            boolean empty = BackgroundSelection.types(activity).isEmpty()
+                    || LiveWallpaperSelection.triggers(activity).isEmpty()
+                    || (BackgroundSelection.types(activity).equals(java.util.Collections.singleton("live")) && selected.isEmpty());
+            String label = BackgroundSelection.automatic(activity) ? "Automatisch" + (empty ? " · pausiert" : "") : "Fest";
+            status.setText(label + " · " + BackgroundSelection.currentLabel(activity));
+        }
+
+        @Override protected void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            prefs.registerOnSharedPreferenceChangeListener(listener);
+            config.registerOnSharedPreferenceChangeListener(listener);
+            refresh();
+        }
+
+        @Override protected void onDetachedFromWindow() {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener);
+            config.unregisterOnSharedPreferenceChangeListener(listener);
+            super.onDetachedFromWindow();
+        }
     }
 }

@@ -22,15 +22,15 @@ final class LiveWallpaperRotation {
     private boolean ready(){PowerManager power=context.getSystemService(PowerManager.class);return active&&!closed&&BackgroundSelection.automatic(context)&&!BackgroundSelection.types(context).isEmpty()&&power!=null&&power.isInteractive();}
     private void preferencesChanged(String key){
         if(closed||choosing)return;
-        boolean controls=BackgroundSelection.MODE.equals(key)||BackgroundSelection.TYPES.equals(key);
+        boolean controls=BackgroundSelection.MODE.equals(key)||BackgroundSelection.TYPES.equals(key)||LiveWallpaperSelection.SOURCES.equals(key);
         boolean triggers=LiveWallpaperSelection.MODE.equals(key)||LiveWallpaperSelection.TRIGGERS.equals(key);
         if(triggers){
             Set<String> next=LiveWallpaperSelection.triggers(context);
             if(!previous.contains("tv")&&next.contains("tv")){wake.prime();consumedWake();}
             previous=next;
         }
-        if(controls||triggers||LiveWallpaperSelection.MINUTES.equals(key)||LiveWallpaperSelection.POOL.equals(key))LiveWallpaperPrefs.clock(context);
-        if(controls||triggers||LiveWallpaperSelection.MINUTES.equals(key)||LiveWallpaperSelection.POOL.equals(key)||LiveWallpaperSelection.CATEGORY.equals(key)||LiveWallpaperSelection.FAVORITES.equals(key)||"source".equals(key)||"enabled".equals(key)){schedule();changed.run();}
+        if(controls||triggers||LiveWallpaperSelection.MINUTES.equals(key)||LiveWallpaperSelection.POOL.equals(key)||YouTubeFavorites.INCLUDE.equals(key))LiveWallpaperPrefs.clock(context);
+        if(controls||triggers||LiveWallpaperSelection.MINUTES.equals(key)||LiveWallpaperSelection.POOL.equals(key)||LiveWallpaperSelection.CATEGORY.equals(key)||LiveWallpaperSelection.FAVORITES.equals(key)||YouTubeFavorites.KEY.equals(key)||YouTubeFavorites.INCLUDE.equals(key)||"source".equals(key)||"enabled".equals(key)){schedule();changed.run();}
     }
     void start(){
         if(closed)return;

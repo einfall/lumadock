@@ -15,6 +15,80 @@ import java.util.*;
 final class LiveWallpaperPopup {
     private final Activity a;private final Runnable changed;private final SharedPreferences prefs,runtime;
     static void show(Activity a,Runnable changed){new LiveWallpaperPopup(a,changed).home();}
+    static android.view.View ownContent(Activity activity, Runnable changed) {
+        LiveWallpaperPopup source = new LiveWallpaperPopup(activity, changed);
+        ScrollView scroll = new ScrollView(activity);
+        scroll.setVerticalScrollBarEnabled(false);
+        LinearLayout body = new LinearLayout(activity);
+        body.setOrientation(LinearLayout.VERTICAL);
+        body.setPadding(source.dp(10), source.dp(10), source.dp(10), source.dp(8));
+        scroll.addView(body, new ScrollView.LayoutParams(-1, -2));
+        body.addView(GlassDialog.text(activity, "Eigene Datei oder Video-URL", 14));
+        EditText input = new EditText(activity);
+        input.setTextColor(Color.WHITE);
+        input.setTextSize(12);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        input.setSingleLine(true);
+        input.setSelectAllOnFocus(true);
+        input.setBackgroundResource(R.drawable.weather_field);
+        input.setHint("https://… oder /sdcard/Movies/…");
+        input.setHintTextColor(0xFF99A9BD);
+        String current = LiveWallpaperPrefs.source(activity);
+        boolean preset = false;
+        for (LiveWallpaperCatalog.Item item : LiveWallpaperCatalog.load(activity)) if (item.url.equals(current)) preset = true;
+        if (!preset && YouTubeVideo.id(current).isEmpty()) input.setText(current);
+        LinearLayout.LayoutParams field = new LinearLayout.LayoutParams(-1, source.dp(42));
+        field.topMargin = source.dp(12);
+        body.addView(input, field);
+        TextView error = GlassDialog.text(activity, "", 11);
+        error.setTextColor(0xFFFFC0A3);
+        error.setPadding(0, source.dp(5), 0, source.dp(5));
+        body.addView(error);
+        LinearLayout actions = new LinearLayout(activity);
+        TextView use = DesignPopup.button(activity, "Übernehmen");
+        TextView file = DesignPopup.button(activity, "Datei wählen");
+        actions.addView(use, new LinearLayout.LayoutParams(0, source.dp(36), 1));
+        LinearLayout.LayoutParams fileParams = new LinearLayout.LayoutParams(0, source.dp(36), 1);
+        fileParams.setMarginStart(source.dp(6));
+        actions.addView(file, fileParams);
+        body.addView(actions);
+        file.setOnClickListener(v -> source.pickFile());
+        use.setOnClickListener(v -> {
+            String value = input.getText().toString().trim();
+            if (!LiveWallpaperSource.valid(value)) { error.setText(R.string.live_invalid); return; }
+            Uri uri = value.startsWith("/") ? Uri.fromFile(new File(value)) : Uri.parse(value);
+            if ("file".equalsIgnoreCase(uri.getScheme()) && !new File(uri.getPath()).canRead()) {
+                error.setText(R.string.live_file_unreadable);
+                return;
+            }
+            String name = uri.getLastPathSegment();
+            LiveWallpaperPrefs.select(activity, value, name == null || name.isEmpty() ? "Eigener Live-Hintergrund" : name);
+            error.setText("Als fester Hintergrund übernommen");
+            InputMethodManager keyboard = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (keyboard != null) keyboard.hideSoftInputFromWindow(input.getWindowToken(), 0);
+            use.requestFocus();
+            changed.run();
+        });
+        LinearLayout enabled = SettingsSheet.row(activity, "video", "Live-Hintergrund", "Aktivieren / ausschalten", "");
+        TextView value = (TextView) enabled.getChildAt(enabled.getChildCount() - 1);
+        Runnable update = () -> value.setText(source.prefs.getBoolean("enabled", false) ? "Ein" : "Aus");
+        update.run();
+        enabled.setOnClickListener(v -> {
+            BackgroundSelection.mode(activity, "fixed");
+            source.prefs.edit().putBoolean("enabled", !source.prefs.getBoolean("enabled", false)).apply();
+            update.run();
+            changed.run();
+        });
+        LinearLayout.LayoutParams row = new LinearLayout.LayoutParams(-1, -2);
+        row.topMargin = source.dp(14);
+        body.addView(enabled, row);
+        body.addView(new GridSlider(activity, "Abdunklung", 0, 90,
+                LiveWallpaperSource.dim(source.prefs.getInt("dim", 35)), n -> {
+                    source.prefs.edit().putInt("dim", n).apply();
+                    changed.run();
+                }));
+        return scroll;
+    }
     private LiveWallpaperPopup(Activity a,Runnable changed){this.a=a;this.changed=changed;prefs=LiveWallpaperPrefs.prefs(a);runtime=a.getSharedPreferences(LiveWallpaperPrefs.RUNTIME,0);}
     private String s(int id){return a.getString(id);}
     private void home(){
@@ -26,6 +100,7 @@ final class LiveWallpaperPopup {
         SharedPreferences.OnSharedPreferenceChangeListener listener=(sp,key)->update.run();prefs.registerOnSharedPreferenceChangeListener(listener);runtime.registerOnSharedPreferenceChangeListener(listener);p.dialog.setOnDismissListener(d->{prefs.unregisterOnSharedPreferenceChangeListener(listener);runtime.unregisterOnSharedPreferenceChangeListener(listener);});
         enabled[0]=p.toggle(s(R.string.live_enabled),s(R.string.live_enabled_hint),prefs.getBoolean("enabled",false),on->{BackgroundSelection.mode(a,"fixed");prefs.edit().putBoolean("enabled",on).apply();changed.run();});
         p.group(s(R.string.live_source));p.row("tune",s(R.string.live_search),s(R.string.live_search_hint),()->search(LiveWallpaperCatalog.load(a)));p.row("photo","Live-Hintergründe auswählen",s(R.string.live_presets_hint),()->DesignStudio.media(a,false,true));p.row("video",s(R.string.live_custom),s(R.string.live_custom_hint),this::custom);p.row("photo",s(R.string.live_file),s(R.string.live_file_hint),this::pickFile);
+        p.row("video","YouTube suchen & Favoriten","Suche, Vorschau mit Spulen und Favoriten per langem OK",()->YouTubeBrowser.show(a,changed));
         p.info("Automatischer Wechsel von Live-Hintergründen, Bildern und Verläufen wird unter Hintergrund → Wechsel eingestellt. Eine eigene Datei / URL legt einen festen Hintergrund fest.");
         p.group(s(R.string.menu_appearance));p.add(new GridSlider(a,s(R.string.live_dim),0,90,LiveWallpaperSource.dim(prefs.getInt("dim",35)),n->{prefs.edit().putInt("dim",n).apply();changed.run();}));
         p.info(s(R.string.live_behavior));p.show();

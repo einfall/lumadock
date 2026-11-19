@@ -15,6 +15,7 @@ final class LiveWallpaperPlayer implements TextureView.SurfaceTextureListener {
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final LiveWallpaperRotation rotation;
     private MediaPlayer player;private Surface surface;private boolean active,closed,prepared,rendered,failed;private String opened="";private int videoW,videoH;
+    private YouTubeEmbed youtube;private boolean preview;
     private final Runnable timeout=()->{if(player!=null&&!rendered)error();};
     private final BroadcastReceiver screen=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){if(Intent.ACTION_SCREEN_OFF.equals(i.getAction())){rotation.screenOff();suspend();}else{rotation.screenOn();if(active)refresh();}}};
     LiveWallpaperPlayer(Context c,FrameLayout root){
@@ -27,15 +28,38 @@ final class LiveWallpaperPlayer implements TextureView.SurfaceTextureListener {
     }
     void start(){active=true;failed=false;rotation.start();refresh();}
     void stop(){active=false;rotation.stop();suspend();}
+    void preview(boolean showing){preview=showing;refresh();}
     private boolean enabled(){return LiveWallpaperPrefs.prefs(context).getBoolean("enabled",false);}
     void refresh(){
         if(closed)return;int dim=LiveWallpaperSource.dim(LiveWallpaperPrefs.prefs(context).getInt("dim",35));shade.setBackgroundColor((Math.round(dim*2.55f)<<24));
         String source=LiveWallpaperPrefs.source(context);PowerManager power=context.getSystemService(PowerManager.class);
-        if(!active||power==null||!power.isInteractive()||!enabled()){suspend();if(!enabled())state("off");return;}
+        if(!active||preview||power==null||!power.isInteractive()||!enabled()){suspend();if(!enabled())state("off");return;}
         if(!LiveWallpaperSource.valid(source)){suspend();state(source.isEmpty()?"empty":"error");return;}
         if(!source.equals(opened)){releasePlayer();opened=source;failed=false;}
         if(failed)return;
+        String youtubeId=YouTubeVideo.id(source);
+        if(!youtubeId.isEmpty()){
+            layer.setVisibility(View.VISIBLE);texture.setVisibility(View.GONE);shade.setVisibility(View.GONE);
+            if(youtube==null)openYouTube(youtubeId);
+            return;
+        }
+        texture.setVisibility(View.VISIBLE);
         layer.setVisibility(View.VISIBLE);if(player==null){layer.setAlpha(1);shade.setVisibility(View.GONE);state("loading");if(texture.isAvailable())open();}
+    }
+    private void openYouTube(String id){
+        state("loading");
+        try{
+            youtube=new YouTubeEmbed(context,id,false,true,new YouTubeEmbed.Listener(){
+                public void update(int value,double position,double duration){if(value==1)state("playing");else if(value==2)state("paused");}
+                public void error(String message){
+                    if(youtube!=null){youtube.close();youtube=null;}
+                    failed=true;layer.setVisibility(View.GONE);state("error");
+                    context.getSharedPreferences(LiveWallpaperPrefs.RUNTIME,0).edit().putString("youtube_error",message).apply();
+                }
+            });
+            youtube.view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+            layer.addView(youtube.view,0,new FrameLayout.LayoutParams(-1,-1));
+        }catch(RuntimeException unavailable){failed=true;layer.setVisibility(View.GONE);state("error");}
     }
     private void open(){
         if(closed||!active||failed||player!=null||!texture.isAvailable()||!enabled())return;
@@ -54,12 +78,13 @@ final class LiveWallpaperPlayer implements TextureView.SurfaceTextureListener {
     }
     private void error(){failed=true;releasePlayer();layer.setVisibility(View.GONE);state("error");}
     private void suspend(){releasePlayer();layer.setVisibility(View.GONE);opened="";failed=false;state(enabled()?"paused":"off");}
-    private void releasePlayer(){handler.removeCallbacks(timeout);if(player!=null){MediaPlayer old=player;player=null;old.setOnPreparedListener(null);old.setOnErrorListener(null);old.setOnInfoListener(null);old.setOnVideoSizeChangedListener(null);old.release();}if(surface!=null){surface.release();surface=null;}prepared=false;}
+    private void releasePlayer(){handler.removeCallbacks(timeout);if(youtube!=null){youtube.close();youtube=null;}releaseNative();}
+    private void releaseNative(){if(player!=null){MediaPlayer old=player;player=null;old.setOnPreparedListener(null);old.setOnErrorListener(null);old.setOnInfoListener(null);old.setOnVideoSizeChangedListener(null);old.release();}if(surface!=null){surface.release();surface=null;}prepared=false;}
     private void transform(){float[] scale=LiveWallpaperSource.cover(texture.getWidth(),texture.getHeight(),videoW,videoH);Matrix m=new Matrix();m.setScale(scale[0],scale[1],texture.getWidth()/2f,texture.getHeight()/2f);texture.setTransform(m);}
     private void state(String value){SharedPreferences p=context.getSharedPreferences(LiveWallpaperPrefs.RUNTIME,0);if(value.equals(p.getString("state","")))return;p.edit().putString("state",value).putInt("width",videoW).putInt("height",videoH).apply();Log.i("TvHome.LiveWallpaper",value);}
     @Override public void onSurfaceTextureAvailable(SurfaceTexture s,int w,int h){if(active)refresh();}
     @Override public void onSurfaceTextureSizeChanged(SurfaceTexture s,int w,int h){transform();}
-    @Override public boolean onSurfaceTextureDestroyed(SurfaceTexture s){releasePlayer();return true;}
+    @Override public boolean onSurfaceTextureDestroyed(SurfaceTexture s){releaseNative();return true;}
     @Override public void onSurfaceTextureUpdated(SurfaceTexture s){if(player!=null&&prepared&&!rendered){rendered=true;handler.removeCallbacks(timeout);shade.setVisibility(View.VISIBLE);state("playing");}}
     void close(){if(closed)return;closed=true;active=false;rotation.close();releasePlayer();handler.removeCallbacksAndMessages(null);context.unregisterReceiver(screen);layer.setVisibility(View.GONE);}
 }

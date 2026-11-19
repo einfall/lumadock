@@ -69,12 +69,12 @@ final class DesignSnapshot {
             add(HOME, String.class, key + "color");
         }
 
-        add(LIVE, Boolean.class, "enabled");
+        add(LIVE, Boolean.class, "enabled", YouTubeFavorites.INCLUDE);
         add(LIVE, Integer.class, "dim", LiveWallpaperSelection.MINUTES);
         add(LIVE, String.class, "source", "title", LiveWallpaperSelection.POOL, LiveWallpaperSelection.MODE,
-                LiveWallpaperSelection.CATEGORY, BackgroundSelection.MODE);
+                LiveWallpaperSelection.CATEGORY, BackgroundSelection.MODE, YouTubeFavorites.KEY);
         add(LIVE, JSONArray.class, LiveWallpaperSelection.FAVORITES, LiveWallpaperSelection.TRIGGERS,
-                BackgroundSelection.TYPES);
+                BackgroundSelection.TYPES, LiveWallpaperSelection.SOURCES);
         add(SAVER, Boolean.class, SaverPrefs.RANDOM);
         add(SAVER, Integer.class, SaverPrefs.DIM, SaverPrefs.MINUTES);
         add(SAVER, String.class, SaverPrefs.MODE, SaverPrefs.PHOTO, SaverPrefs.IMAGE, SaverPrefs.VIDEO, SaverPrefs.TITLE);
@@ -208,14 +208,14 @@ final class DesignSnapshot {
         for (LiveWallpaperCatalog.Item item : LiveWallpaperCatalog.bundled(context)) catalog.add(item.url);
 
         JSONObject live = result.getJSONObject("live");
-        if (!catalog.contains(live.optString("source"))) {
+        if (!catalog.contains(live.optString("source")) && YouTubeVideo.id(live.optString("source")).isEmpty()) {
             live.remove("source");
             live.remove("title");
             live.remove("enabled");
         }
         if (live.has(LiveWallpaperSelection.FAVORITES)) {
             Set<String> favorites = stringSet(live.getJSONArray(LiveWallpaperSelection.FAVORITES));
-            favorites.retainAll(catalog);
+            favorites.removeIf(url -> !catalog.contains(url) && YouTubeVideo.id(url).isEmpty());
             live.put(LiveWallpaperSelection.FAVORITES, new JSONArray(favorites));
         }
         JSONObject saver = result.getJSONObject("saver");
@@ -342,3 +342,4 @@ final class DesignSnapshot {
         }
     }
 }
+

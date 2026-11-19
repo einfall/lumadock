@@ -27,6 +27,7 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 - Fokusrahmen, Abstand, Stärke, Glanz, Farbverläufe, Glow und Zoom getrennt anpassbar.
 - Glas- und Farb-Themes für Dock, Buttons und Widgets; direkte Vorschau in der Einstellungen-Liste.
 - Fotos, Verläufe und stumme Live-Hintergründe, Favoriten per langem OK und kombinierbare Wechselregeln.
+- YouTube-Suche mit Vorschau, gemeinsame Live-Favoriten mit Herkunftsanzeige und mehrere Zufallsquellen per Checkbox. Hintergrund-Einstellungen bleiben in einer Ansicht mit animierten Pivot-Tabs.
 - Frei platzierbare Uhr, Datum und Wetter. Eigene Widgets mit Vorschaukacheln, vier Digitaluhr-Stilen, Monats- und Wochenkalender sowie Android-Widgets.
 - Designprofile mit Sicherung und verschlüsselter Übertragung des aktiven Layouts im Heimnetz.
 - Echo-Wiedergabe über Home Assistant mit Geräteauswahl, Titel, Cover und Fortschritt.

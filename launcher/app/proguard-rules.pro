@@ -2,3 +2,7 @@
 # AndroidX code, not from renaming, and readable stack traces matter more in a sideloaded app
 # where crash reports arrive as screenshots.
 -dontobfuscate
+
+-keepclassmembers class com.gathin.tvhome.YouTubeEmbed$Bridge {
+    @android.webkit.JavascriptInterface <methods>;
+}
