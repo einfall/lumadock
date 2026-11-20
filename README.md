@@ -41,7 +41,7 @@ Die gezeigten App-Logos und externen Hintergrundinhalte gehören ihren jeweilige
 
 ## Download
 
-[Version 1.2.3 herunterladen](https://github.com/einfall/lumadock/releases/tag/v1.2.3). Die signierte APK kann ab Android 8.0 installiert werden. Bestehende Installationen mit derselben Signatur können über **Info** aktualisiert werden.
+[Version 1.2.10 herunterladen](https://github.com/einfall/lumadock/releases/tag/v1.2.10). Die signierte APK kann ab Android 8.0 installiert werden. Bestehende Installationen mit derselben Signatur können über **Info** aktualisiert werden.
 
 ## Einrichtung auf einen zweiten TV übertragen
 

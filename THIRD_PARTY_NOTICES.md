@@ -4,6 +4,8 @@ The root MIT license applies to the CleanYourTV base and Luma Dock code except w
 
 - **CleanYourTV**: https://github.com/Gathin23/cleanyourtv — MIT, Copyright 2026 Gathin; root LICENSE.
 - **AndroidX RecyclerView and DynamicAnimation**: Apache 2.0; resolved by Gradle.
+- **android-youtube-player core 13.1.0**: https://github.com/PierfrancescoSoffritti/android-youtube-player — MIT, Copyright 2025 Pierfrancesco Soffritti. Full license and usage notes: `launcher/app/src/main/assets/android-youtube-player/`.
+- **AndroidX WebKit 1.10.0**: Apache 2.0; resolved by Gradle. Used for the optional background-only YouTube presentation styling; see the player usage notes above.
 - **Aura TV scenes**: https://github.com/cookedzera/aura-tv — adapted MIT code. Full notices: `launcher/app/src/main/assets/aura/NOTICE.txt` and `saver_photos/AURA_LICENSE.txt`.
 - **QuickAccess TV dock material**: https://github.com/Ricardo-Manzanares/QuickAccessTV — MIT. Pinned source, original notice and license in `assets/quickaccess-dock/`.
 - **Couchy Launcher live-wallpaper catalog**: https://github.com/conreo/couchy-launcher — GPLv3 metadata catalog in `assets/live_wallpaper.json`. Original license and provenance: `live_wallpaper_LICENSE.txt`, `live_wallpaper_NOTICE.txt` and `live_wallpaper_CERTIFICATE.txt`. The complete catalog and the code reading it are provided here. No remote video files are distributed; sources retain their own rights and availability.

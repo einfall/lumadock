@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.10 — 2026-11-20
+
+- Use android-youtube-player 13.1.0 with explicit initialization for both the YouTube preview and Home background. Keep preview playback, seeking and sound controls in native Luma Dock buttons.
+- For live backgrounds, hide desktop and mobile player titles, playback feedback and their dark gradients before rendering when Android System WebView supports document-start scripts. This experimental presentation depends on YouTube's markup; ads, video, captions and player errors remain intact.
+- Repeat the loaded video by seeking to the start instead of loading it again. Keep preview controls separate from background-only styling and release the player and registered script together.
+- Retain the background search, shared live favorites, multi-source random selection and animated tab improvements from 1.2.6.
+- Passed 530 unit tests and Android lint with zero errors. Verified playback, reload frames and repeated loop transitions with screenshots on a Philips Android TV running Android 11.
+
 ## 1.2.6 — 2026-11-19
 
 - Add YouTube video search without requiring an API key, thumbnail results, a seekable preview, and fixed or random live-background playback.

@@ -1,134 +1,138 @@
 package com.gathin.tvhome;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.RenderProcessGoneDetail;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import org.json.JSONObject;
+import androidx.webkit.ScriptHandler;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
-/** Official iframe playback with the installed app identity, shared by preview and Home. */
+/** Library-backed iframe playback. Luma owns preview controls; YouTube controls stay hidden. */
 final class YouTubeEmbed {
     interface Listener {
         void update(int state, double position, double duration);
         void error(String message);
     }
 
-    final WebView view;
+    final YouTubePlayerView view;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final Listener listener;
+    private YouTubePlayer player;
+    private ScriptHandler wallpaperUi;
     private boolean closed, failed;
+    private int state = -1;
+    private float position, duration;
     private final Runnable timeout = () -> fail("YouTube lädt zu lange. Internet und Android System WebView prüfen.");
 
-    @SuppressLint("SetJavaScriptEnabled")
-    YouTubeEmbed(Context context, String id, boolean controls, boolean loop, Listener listener) {
+    YouTubeEmbed(Context context, String id, boolean preview, boolean loop, Listener listener) {
         if (!YouTubeVideo.validId(id)) throw new IllegalArgumentException("Invalid video");
         this.listener = listener;
-        view = new WebView(context);
+        // Disable automatic initialization before construction to avoid a second network observer
+        // racing the explicitly configured controls(0) player.
+        view = (YouTubePlayerView) LayoutInflater.from(context).inflate(R.layout.youtube_player, null);
         view.setBackgroundColor(Color.BLACK);
-        view.setFocusable(controls);
-        WebSettings settings = view.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        view.addJavascriptInterface(new Bridge(), "LumaYouTube");
-        view.setWebViewClient(new WebViewClient() {
-            @Override public boolean shouldOverrideUrlLoading(WebView web, WebResourceRequest request) {
-                return request.isForMainFrame();
-            }
-            @Override public boolean onRenderProcessGone(WebView web, RenderProcessGoneDetail detail) {
-                fail("Der YouTube-Player wurde von Android beendet.");
-                return true;
-            }
-        });
-        String origin = "https://" + context.getPackageName().toLowerCase(java.util.Locale.ROOT);
-        String html = """
-                <!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
-                <meta name="referrer" content="strict-origin-when-cross-origin">
-                <style>html,body,#player{margin:0;width:100%;height:100%;background:#000;overflow:hidden}</style>
-                </head><body><div id="player"></div><script>
-                var player,ready=false;
-                function report(){if(!ready)return;try{LumaYouTube.state(player.getPlayerState(),
-                  player.getCurrentTime(),player.getDuration());}catch(e){}}
-                function onYouTubeIframeAPIReady(){player=new YT.Player('player',{
-                  videoId:VIDEO_ID,width:'100%',height:'100%',
-                  playerVars:{autoplay:1,controls:CONTROLS,playsinline:1,rel:0,origin:ORIGIN,
-                    loop:LOOP,playlist:VIDEO_ID},events:{
-                    onReady:function(e){ready=true;e.target.mute();e.target.playVideo();report();},
-                    onStateChange:report,
-                    onError:function(e){LumaYouTube.error(Number(e.data));},
-                    onAutoplayBlocked:function(){LumaYouTube.error(-2);}
-                  }});}
-                function toggle(){if(!ready)return;if(player.getPlayerState()===1)player.pauseVideo();else player.playVideo();}
-                function seekBy(seconds){if(!ready)return;var end=player.getDuration();
-                  var target=Math.max(0,player.getCurrentTime()+seconds);
-                  if(end>0)target=Math.min(end-0.2,target);player.seekTo(target,true);report();}
-                function sound(on){if(ready){if(on)player.unMute();else player.mute();}}
-                setInterval(report,750);
-                </script><script src="https://www.youtube.com/iframe_api"></script></body></html>
-                """.replace("VIDEO_ID", JSONObject.quote(id))
-                .replace("CONTROLS", controls ? "1" : "0")
-                .replace("LOOP", loop ? "1" : "0")
-                .replace("ORIGIN", JSONObject.quote(origin));
-        view.loadDataWithBaseURL(origin + "/", html, "text/html", "UTF-8", null);
+        view.setFocusable(false);
+        view.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        IFramePlayerOptions options = new IFramePlayerOptions.Builder(context)
+                .controls(0).mute(1).rel(0).ivLoadPolicy(3).build();
         main.postDelayed(timeout, 30000);
+        try {
+            if (!preview) wallpaperUi = YouTubeWallpaperUi.install(view);
+            view.initialize(new AbstractYouTubePlayerListener() {
+                @Override public void onReady(YouTubePlayer ready) {
+                    if (closed) return;
+                    player = ready;
+                    ready.mute();
+                    ready.loadVideo(id, 0);
+                }
+                @Override public void onStateChange(YouTubePlayer source, PlayerConstants.PlayerState value) {
+                    if (closed) return;
+                    switch (value) {
+                        case PLAYING: state = 1; failed = false; break;
+                        case PAUSED: state = 2; break;
+                        case ENDED: state = 0; break;
+                        case BUFFERING: state = 3; break;
+                        case VIDEO_CUED: state = 5; break;
+                        default: state = -1;
+                    }
+                    if (state == 1 || state == 2 || state == 0) main.removeCallbacks(timeout);
+                    report();
+                    if (state == 0 && loop && !closed && !failed) {
+                        position = 0;
+                        // Reuse the loaded video rather than triggering another video load/start UI.
+                        source.seekTo(0);
+                        source.play();
+                        Log.d("TvHome.YouTube", "Loop: seek to start");
+                    }
+                }
+                @Override public void onCurrentSecond(YouTubePlayer source, float second) {
+                    if (!Float.isFinite(second) || second < 0 || closed) return;
+                    position = second;
+                    report();
+                }
+                @Override public void onVideoDuration(YouTubePlayer source, float seconds) {
+                    if (!Float.isFinite(seconds) || seconds < 0 || closed) return;
+                    duration = seconds;
+                    report();
+                }
+                @Override public void onError(YouTubePlayer source, PlayerConstants.PlayerError error) {
+                    String message;
+                    switch (error) {
+                        case VIDEO_NOT_FOUND: message = "Das Video ist nicht mehr verfügbar oder privat."; break;
+                        case VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER:
+                            message = "Dieses Video erlaubt keine eingebettete Wiedergabe."; break;
+                        case REQUEST_MISSING_HTTP_REFERER:
+                            message = "YouTube hat die Player-Identifikation abgelehnt. Android System WebView aktualisieren."; break;
+                        default: message = "YouTube kann das Video auf diesem Gerät nicht abspielen (" + error.name() + ").";
+                    }
+                    fail(message);
+                }
+            }, options);
+        } catch (RuntimeException error) {
+            close();
+            throw error;
+        }
     }
-
-    void toggle() { script("toggle()"); }
-    void seek(int seconds) { script("seekBy(" + seconds + ")"); }
-    void sound(boolean enabled) { script("sound(" + enabled + ")"); }
-    private void script(String script) { if (!closed) view.evaluateJavascript(script, null); }
-
+    private void report() {
+        if (!closed && !failed) listener.update(state, position, duration);
+    }
+    void toggle() {
+        if (closed || player == null) return;
+        if (state == 1) player.pause(); else player.play();
+    }
+    void seek(int seconds) {
+        if (closed || player == null) return;
+        float target = Math.max(0, position + seconds);
+        if (duration > 0) target = Math.min(Math.max(0, duration - .2f), target);
+        player.seekTo(target);
+    }
+    void sound(boolean enabled) {
+        if (closed || player == null) return;
+        if (enabled) player.unMute(); else player.mute();
+    }
     private void fail(String message) {
         main.removeCallbacks(timeout);
+        if (closed || failed) return;
         failed = true;
-        if (!closed) listener.error(message);
+        listener.error(message);
     }
-
-    final class Bridge {
-        @JavascriptInterface public void state(int state, double position, double duration) {
-            if (!Double.isFinite(position) || !Double.isFinite(duration) || position < 0 || duration < 0) return;
-            main.post(() -> {
-                if (closed) return;
-                if (state == 1) failed = false;
-                if (failed) return;
-                if (state == 1 || state == 2 || state == 0) main.removeCallbacks(timeout);
-                listener.update(state, position, duration);
-            });
-        }
-        @JavascriptInterface public void error(int code) {
-            main.post(() -> {
-                String message;
-                switch (code) {
-                    case 100: message = "Das Video ist nicht mehr verfügbar oder privat."; break;
-                    case 101: case 150: message = "Dieses Video erlaubt keine eingebettete Wiedergabe."; break;
-                    case 153: message = "YouTube hat die Player-Identifikation abgelehnt. Android System WebView aktualisieren."; break;
-                    case -2: message = "YouTube wartet auf einen Start. Bitte Wiedergabe drücken."; break;
-                    default: message = "YouTube kann das Video auf diesem Gerät nicht abspielen (" + code + ").";
-                }
-                fail(message);
-            });
-        }
-    }
-
     void close() {
         if (closed) return;
         closed = true;
         main.removeCallbacksAndMessages(null);
-        view.removeJavascriptInterface("LumaYouTube");
-        view.stopLoading();
-        view.onPause();
+        player = null;
+        if (wallpaperUi != null) {
+            try { wallpaperUi.remove(); } catch (RuntimeException ignored) { /* WebView may already be gone. */ }
+            wallpaperUi = null;
+        }
+        view.release();
         if (view.getParent() instanceof ViewGroup) ((ViewGroup) view.getParent()).removeView(view);
-        view.destroy();
     }
 }

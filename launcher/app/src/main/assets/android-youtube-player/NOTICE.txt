@@ -1,0 +1,14 @@
+android-youtube-player core 13.1.0
+https://github.com/PierfrancescoSoffritti/android-youtube-player
+Copyright (c) 2025 Pierfrancesco Soffritti
+MIT license: LICENSE.txt in this directory.
+
+Luma Dock uses the published Maven Central library for visible YouTube playback.
+The library uses YouTube's iframe player. Player controls are disabled with
+IFramePlayerOptions.Builder(context).controls(0); preview controls are native Luma Dock buttons.
+
+For the visible Home background, Luma Dock adds its own cosmetic stylesheet to the
+YouTube frame before rendering through AndroidX WebKit 1.10.0 (Apache 2.0).
+Title/chrome and playback feedback are hidden outside advertising playback.
+The video, ads, captions and player errors are not modified. This optional styling
+requires DOCUMENT_START_SCRIPT support and depends on YouTube's DOM structure.
